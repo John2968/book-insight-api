@@ -55,18 +55,31 @@ Default `.env` uses SQLite: `DATABASE_URL=sqlite+aiosqlite:///./book_insight.db`
 alembic upgrade head
 ```
 
-### 5. Load sample data (optional)
+### 5. Load data (optional)
 
-Creates demo users, authors, books and reviews:
+**Option A – Demo users and a few books/reviews (for testing auth and reviews):**
 
 ```bash
 python scripts/load_sample_data.py
 ```
 
-Sample users:
+Sample users: **admin** / `admin123`, **alice** / `password123`.
 
-- **Admin**: `admin` / `admin123`
-- **User**: `alice` / `password123`
+**Option B – Import books from a CSV (public-dataset style):**
+
+The repo includes a small `data/raw/sample_books.csv` (15 books). To import it:
+
+```bash
+python scripts/import_books_from_csv.py
+```
+
+To use your own CSV (e.g. from [Kaggle Goodreads datasets](https://www.kaggle.com/datasets)), place the file in `data/raw/` and run:
+
+```bash
+python scripts/import_books_from_csv.py data/raw/books.csv
+```
+
+Supported columns: `title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `publication_date`, `genre`. See `data/raw/README.md` for details and licence/citation.
 
 ### 6. Run the API
 

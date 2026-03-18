@@ -18,7 +18,7 @@ Use this outline to write your **Technical Report** PDF. Fill in each section in
 - **Internal data**: PostgreSQL (or SQLite for dev); main entities: **users**, **authors**, **books**, **reviews**, **reading_list_entries**
 - **Data model**: Describe relationships (e.g. Book → Author; Review → User, Book; ReadingListEntry → User, Book). You can refer to the ER diagram in the repo or draw one
 - **External data** (if used): e.g. Google Books / Open Library for enrichment; cite licence and how you use it. If not yet integrated, state “planned” and keep focus on internal model
-- **Sample/seed data**: Mention `scripts/load_sample_data.py` and how it populates authors, books, users, and reviews for demonstration
+- **Sample/seed data**: (1) `scripts/load_sample_data.py` – demo users, authors, books, and reviews for testing auth and reviews. (2) **CSV import** – `scripts/import_books_from_csv.py` imports books (and creates authors) from a CSV; the repo includes `data/raw/sample_books.csv` (15 books). You can use a public dataset (e.g. [Kaggle Goodreads books](https://www.kaggle.com/datasets)): download the CSV, place it in `data/raw/`, and run the import script. Cite the dataset and licence in the report.
 
 ---
 
