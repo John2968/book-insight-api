@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import forbidden, not_found
 from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.book import Book
@@ -42,7 +43,7 @@ async def create_review(
     book_result = await db.execute(select(Book).where(Book.id == payload.book_id))
     book = book_result.scalar_one_or_none()
     if not book:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+        raise not_found(code="BOOK_NOT_FOUND", message="Book not found", details={"book_id": payload.book_id})
 
     review = Review(
         rating=payload.rating,
@@ -75,9 +76,9 @@ async def update_review(
     result = await db.execute(select(Review).where(Review.id == review_id))
     review = result.scalar_one_or_none()
     if not review:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+        raise not_found(code="REVIEW_NOT_FOUND", message="Review not found", details={"review_id": review_id})
     if review.user_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to edit this review")
+        raise forbidden(code="REVIEW_FORBIDDEN", message="Not allowed to edit this review")
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(review, field, value)
@@ -108,9 +109,9 @@ async def delete_review(
     result = await db.execute(select(Review).where(Review.id == review_id))
     review = result.scalar_one_or_none()
     if not review:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+        raise not_found(code="REVIEW_NOT_FOUND", message="Review not found", details={"review_id": review_id})
     if review.user_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete this review")
+        raise forbidden(code="REVIEW_FORBIDDEN", message="Not allowed to delete this review")
 
     book_id = review.book_id
     await db.delete(review)

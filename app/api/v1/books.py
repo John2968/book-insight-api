@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import not_found
 from app.core.security import get_current_active_admin
 from app.db.session import get_db
 from app.models.book import Book
@@ -66,7 +67,7 @@ async def get_book(book_id: int, db: AsyncSession = Depends(get_db)) -> BookRead
     result = await db.execute(select(Book).where(Book.id == book_id))
     book = result.scalar_one_or_none()
     if not book:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+        raise not_found(code="BOOK_NOT_FOUND", message="Book not found", details={"book_id": book_id})
     return BookRead.model_validate(book)
 
 
@@ -80,7 +81,7 @@ async def update_book(
     result = await db.execute(select(Book).where(Book.id == book_id))
     book = result.scalar_one_or_none()
     if not book:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+        raise not_found(code="BOOK_NOT_FOUND", message="Book not found", details={"book_id": book_id})
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(book, field, value)
@@ -99,7 +100,7 @@ async def delete_book(
     result = await db.execute(select(Book).where(Book.id == book_id))
     book = result.scalar_one_or_none()
     if not book:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+        raise not_found(code="BOOK_NOT_FOUND", message="Book not found", details={"book_id": book_id})
     await db.delete(book)
     await db.commit()
 

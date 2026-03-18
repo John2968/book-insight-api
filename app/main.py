@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api import api_router
 from app.core.config import settings
+from app.schemas.common import ErrorResponse, ErrorDetail
 
 
 def create_application() -> FastAPI:
@@ -27,6 +29,14 @@ def create_application() -> FastAPI:
 
     # Routers
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+    # Global exception handler for unexpected errors to return unified error shape
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:  # type: ignore[override]
+        error = ErrorResponse(
+            error=ErrorDetail(code="INTERNAL_SERVER_ERROR", message="An unexpected error occurred", details=None)
+        )
+        return JSONResponse(status_code=500, content=error.model_dump())
 
     return app
 

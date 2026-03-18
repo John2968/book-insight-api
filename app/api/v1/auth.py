@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import bad_request
 from app.core.security import create_access_token, get_current_user, get_password_hash, verify_password
 from app.db.session import get_db
 from app.models.user import User
@@ -21,7 +22,7 @@ async def register_user(payload: UserCreate, db: AsyncSession = Depends(get_db))
     result = await db.execute(query)
     existing = result.scalars().first()
     if existing:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username or email already registered")
+        raise bad_request(code="USER_EXISTS", message="Username or email already registered")
 
     user = User(
         username=payload.username,
@@ -43,7 +44,10 @@ async def login_for_access_token(
     result = await db.execute(select(User).where(User.username == form_data.username))
     user = result.scalar_one_or_none()
     if user is None or not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"error": {"code": "INVALID_CREDENTIALS", "message": "Incorrect username or password", "details": None}},
+        )
 
     access_token = create_access_token(subject=user.username)
     return Token(access_token=access_token)

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import forbidden, not_found
 from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.book import Book
@@ -42,7 +43,7 @@ async def add_to_reading_list(
     book_result = await db.execute(select(Book).where(Book.id == payload.book_id))
     book = book_result.scalar_one_or_none()
     if not book:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+        raise not_found(code="BOOK_NOT_FOUND", message="Book not found", details={"book_id": payload.book_id})
 
     # avoid duplicates
     existing_result = await db.execute(
@@ -71,9 +72,13 @@ async def remove_from_reading_list(
     result = await db.execute(select(ReadingListEntry).where(ReadingListEntry.id == entry_id))
     entry = result.scalar_one_or_none()
     if not entry:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reading list entry not found")
+        raise not_found(
+            code="READING_LIST_ENTRY_NOT_FOUND",
+            message="Reading list entry not found",
+            details={"entry_id": entry_id},
+        )
     if entry.user_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to remove this entry")
+        raise forbidden(code="READING_LIST_FORBIDDEN", message="Not allowed to remove this entry")
 
     await db.delete(entry)
     await db.commit()

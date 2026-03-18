@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import not_found
 from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.book import Book
@@ -19,7 +20,7 @@ async def book_rating_distribution(book_id: int, db: AsyncSession = Depends(get_
     # ensure book exists
     book_result = await db.execute(select(Book.id).where(Book.id == book_id))
     if book_result.scalar_one_or_none() is None:
-        raise HTTPException(status_code=404, detail="Book not found")
+        raise not_found(code="BOOK_NOT_FOUND", message="Book not found", details={"book_id": book_id})
 
     query = (
         select(Review.rating, func.count(Review.id))

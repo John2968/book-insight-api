@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import not_found
 from app.core.security import get_current_active_admin
 from app.db.session import get_db
 from app.models.author import Author
@@ -46,7 +47,7 @@ async def get_author(author_id: int, db: AsyncSession = Depends(get_db)) -> Auth
     result = await db.execute(select(Author).where(Author.id == author_id))
     author = result.scalar_one_or_none()
     if not author:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Author not found")
+        raise not_found(code="AUTHOR_NOT_FOUND", message="Author not found", details={"author_id": author_id})
     return AuthorRead.model_validate(author)
 
 
@@ -60,7 +61,7 @@ async def update_author(
     result = await db.execute(select(Author).where(Author.id == author_id))
     author = result.scalar_one_or_none()
     if not author:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Author not found")
+        raise not_found(code="AUTHOR_NOT_FOUND", message="Author not found", details={"author_id": author_id})
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(author, field, value)
@@ -79,7 +80,7 @@ async def delete_author(
     result = await db.execute(select(Author).where(Author.id == author_id))
     author = result.scalar_one_or_none()
     if not author:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Author not found")
+        raise not_found(code="AUTHOR_NOT_FOUND", message="Author not found", details={"author_id": author_id})
     await db.delete(author)
     await db.commit()
 
