@@ -27,6 +27,16 @@ def create_application() -> FastAPI:
       allow_headers=["*"],
     )
 
+    # Root: point users to API docs and health
+    @app.get("/")
+    async def root():
+        return {
+            "message": "Book Metadata, Review & Insight API",
+            "docs": f"{settings.API_V1_PREFIX}/docs",
+            "redoc": f"{settings.API_V1_PREFIX}/redoc",
+            "health": f"{settings.API_V1_PREFIX}/health/ping",
+        }
+
     # Routers
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
