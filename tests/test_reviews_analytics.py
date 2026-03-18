@@ -1,5 +1,9 @@
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import User
 
 
 async def _register_and_login(client: AsyncClient, username: str) -> str:
@@ -17,20 +21,16 @@ async def _register_and_login(client: AsyncClient, username: str) -> str:
 
 
 @pytest.mark.asyncio
-async def test_reviews_and_analytics(client: AsyncClient):
+async def test_reviews_and_analytics(
+    client: AsyncClient, db_session: AsyncSession
+):
     token = await _register_and_login(client, "alice")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # 将 alice 升级为管理员以调用受保护端点
-    from app.models import User
-    from app.db.session import AsyncSessionLocal
-    from sqlalchemy import select
-
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(select(User).where(User.username == "alice"))
-        user = result.scalar_one()
-        user.is_admin = True
-        await session.commit()
+    result = await db_session.execute(select(User).where(User.username == "alice"))
+    user = result.scalar_one()
+    user.is_admin = True
+    await db_session.commit()
 
     # 创建作者和书
     resp = await client.post(

@@ -1,24 +1,24 @@
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import User
 
 
-async def _create_admin_and_get_token(client: AsyncClient) -> str:
+async def _create_admin_and_get_token(
+    client: AsyncClient, db_session: AsyncSession
+) -> str:
     resp = await client.post(
         "/api/v1/auth/register",
         json={"username": "admin", "email": "admin@example.com", "password": "admin123"},
     )
     assert resp.status_code == 201
 
-    # 手动将用户设为管理员
-    from app.models import User
-    from app.db.session import AsyncSessionLocal
-    from sqlalchemy import select
-
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(select(User).where(User.username == "admin"))
-        user = result.scalar_one()
-        user.is_admin = True
-        await session.commit()
+    result = await db_session.execute(select(User).where(User.username == "admin"))
+    user = result.scalar_one()
+    user.is_admin = True
+    await db_session.commit()
 
     resp = await client.post(
         "/api/v1/auth/login",
@@ -29,8 +29,8 @@ async def _create_admin_and_get_token(client: AsyncClient) -> str:
 
 
 @pytest.mark.asyncio
-async def test_author_and_book_crud_flow(client: AsyncClient):
-    token = await _create_admin_and_get_token(client)
+async def test_author_and_book_crud_flow(client: AsyncClient, db_session: AsyncSession):
+    token = await _create_admin_and_get_token(client, db_session)
     headers = {"Authorization": f"Bearer {token}"}
 
     resp = await client.post(
