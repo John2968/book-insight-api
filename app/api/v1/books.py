@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import not_found
+from app.core.exceptions import bad_request, not_found
 from app.core.security import get_current_active_admin
 from app.db.session import get_db
+from app.models.author import Author
 from app.models.book import Book
 from app.models.review import Review
 from app.models.user import User
@@ -16,6 +17,28 @@ router = APIRouter()
 
 def _base_books_query() -> Select[tuple[Book]]:
     return select(Book)
+
+
+async def _ensure_author_exists(db: AsyncSession, author_id: int | None) -> None:
+    if author_id is None:
+        return
+
+    result = await db.execute(select(Author.id).where(Author.id == author_id))
+    if result.scalar_one_or_none() is None:
+        raise not_found(code="AUTHOR_NOT_FOUND", message="Author not found", details={"author_id": author_id})
+
+
+async def _ensure_isbn_available(db: AsyncSession, isbn: str | None, current_book_id: int | None = None) -> None:
+    if not isbn:
+        return
+
+    query = select(Book.id).where(Book.isbn == isbn)
+    if current_book_id is not None:
+        query = query.where(Book.id != current_book_id)
+
+    result = await db.execute(query)
+    if result.scalar_one_or_none() is not None:
+        raise bad_request(code="BOOK_ISBN_EXISTS", message="A book with this ISBN already exists", details={"isbn": isbn})
 
 
 @router.get("/", response_model=list[BookRead])
@@ -55,6 +78,9 @@ async def create_book(
     db: AsyncSession = Depends(get_db),
     _: User = Depends(get_current_active_admin),
 ) -> BookRead:
+    await _ensure_author_exists(db, payload.author_id)
+    await _ensure_isbn_available(db, payload.isbn)
+
     book = Book(**payload.model_dump())
     db.add(book)
     await db.commit()
@@ -83,7 +109,11 @@ async def update_book(
     if not book:
         raise not_found(code="BOOK_NOT_FOUND", message="Book not found", details={"book_id": book_id})
 
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    update_data = payload.model_dump(exclude_unset=True)
+    await _ensure_author_exists(db, update_data.get("author_id", book.author_id))
+    await _ensure_isbn_available(db, update_data.get("isbn", book.isbn), current_book_id=book_id)
+
+    for field, value in update_data.items():
         setattr(book, field, value)
 
     await db.commit()

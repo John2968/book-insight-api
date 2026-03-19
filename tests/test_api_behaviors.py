@@ -179,3 +179,64 @@ async def test_extended_analytics_endpoints(client: AsyncClient, db_session: Asy
     trending = resp.json()
     assert trending
     assert trending[0]["author_id"] == author_id
+
+
+@pytest.mark.asyncio
+async def test_book_validation_and_complete_rating_distribution(
+    client: AsyncClient, db_session: AsyncSession
+):
+    admin_token = await _register_and_login(client, db_session, "books_admin", is_admin=True)
+    user_token = await _register_and_login(client, db_session, "books_user")
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
+    user_headers = {"Authorization": f"Bearer {user_token}"}
+
+    resp = await client.post(
+        "/api/v1/books/",
+        json={"title": "Broken Book", "author_id": 999999},
+        headers=admin_headers,
+    )
+    assert resp.status_code == 404
+    assert resp.json()["error"]["code"] == "AUTHOR_NOT_FOUND"
+
+    author_id, book_id = await _create_author_and_book(
+        client,
+        admin_headers,
+        author_name="Validation Author",
+        book_title="Validation Book",
+        genre="Science Fiction",
+    )
+
+    resp = await client.put(
+        f"/api/v1/books/{book_id}",
+        json={"isbn": "ISBN-123"},
+        headers=admin_headers,
+    )
+    assert resp.status_code == 200
+
+    _, other_book_id = await _create_author_and_book(
+        client,
+        admin_headers,
+        author_name="Validation Author 2",
+        book_title="Validation Book 2",
+        genre="Science Fiction",
+    )
+
+    resp = await client.put(
+        f"/api/v1/books/{other_book_id}",
+        json={"isbn": "ISBN-123"},
+        headers=admin_headers,
+    )
+    assert resp.status_code == 400
+    assert resp.json()["error"]["code"] == "BOOK_ISBN_EXISTS"
+
+    resp = await client.post(
+        "/api/v1/reviews/",
+        json={"book_id": book_id, "rating": 5, "review_text": "Great"},
+        headers=user_headers,
+    )
+    assert resp.status_code == 201
+
+    resp = await client.get(f"/api/v1/analytics/books/{book_id}/rating-distribution")
+    assert resp.status_code == 200
+    distribution = resp.json()["distribution"]
+    assert distribution == {"1": 0, "2": 0, "3": 0, "4": 0, "5": 1}

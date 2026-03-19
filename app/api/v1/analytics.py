@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +30,8 @@ async def book_rating_distribution(book_id: int, db: AsyncSession = Depends(get_
     )
     result = await db.execute(query)
     rows = result.all()
-    distribution = {str(rating): count for rating, count in rows}
+    distribution = {str(star): 0 for star in range(1, 6)}
+    distribution.update({str(rating): count for rating, count in rows})
     return {"book_id": book_id, "distribution": distribution}
 
 
