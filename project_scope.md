@@ -4,14 +4,14 @@
 **Book Metadata, Review & Insight API**
 
 ## Overview
-This project aims to design and implement a data-driven Web API for book metadata management, user reviews, reading list tracking, and analytical insights. In addition to standard CRUD functionality, the system will support metadata enrichment from external public sources and provide personalised recommendations based on user activity and stored review data.
+This project aims to design and implement a data-driven Web API for book metadata management, user reviews, reading list tracking, and analytical insights. In addition to standard CRUD functionality, the system supports importing metadata from a real public source and provides personalised recommendations based on user activity and stored review data.
 
 ## Objectives
 The main objectives of the project are to:
 - provide a structured RESTful API for managing books and related entities
 - allow users to create, view, update, and manage book reviews
 - support personal reading list management
-- enrich locally stored book records using external public metadata sources
+- import and normalise book metadata from a public data source
 - expose analytics endpoints for exploring patterns in ratings, genres, and user preferences
 - generate personalised recommendations using explainable recommendation logic
 
@@ -27,7 +27,7 @@ General users can:
 
 ### Administrators
 Administrators can:
-- import and enrich book metadata from external sources
+- import and manage book metadata from a public source
 - maintain and correct stored metadata
 - manage application content where required
 
@@ -35,19 +35,24 @@ Administrators can:
 The system uses both internal and external data sources.
 
 ### Internal Data Source
-A local PostgreSQL database will be used to store the main relational data, including:
+A SQL database is used to store the main relational data, including:
 - books
 - authors
 - reviews
 - users
 - reading list entries
 
-### External Data Sources
-To improve metadata quality and coverage, the API will integrate:
-- Google Books
-- Open Library
+For the current implementation:
+- **SQLite** is used for local development and testing
+- **PostgreSQL** is the intended production deployment database
 
-These services will be used to enrich local records with bibliographic details such as ISBNs, categories, descriptions, author information, and cover images.
+### External Data Sources
+The implemented public metadata source is:
+- **Open Library**
+
+The project includes a curated CSV dataset generated from the Open Library Search API and stored as `data/raw/open_library_books.csv`. This dataset is created by `scripts/fetch_open_library_dataset.py` and imported into the application database by `scripts/import_books_from_csv.py`.
+
+This public metadata source is used to populate the local database with bibliographic details such as title, author, ISBN, publication year, genre, ratings average, and ratings count.
 
 ## Non-Functional Requirements
 The project will also prioritise the following non-functional requirements:
@@ -64,3 +69,4 @@ The following features are outside the scope of this project:
 - advanced social or community interaction features
 - a fully trained machine learning recommendation model
 - large-scale distributed or microservice-based infrastructure
+- live third-party metadata enrichment at request time (e.g. direct runtime integration with Google Books)
