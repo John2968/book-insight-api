@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -116,7 +116,7 @@ async def recalculate_book_rating(
     result = await db.execute(select(Book).where(Book.id == book_id))
     book = result.scalar_one_or_none()
     if not book:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
+        raise not_found(code="BOOK_NOT_FOUND", message="Book not found", details={"book_id": book_id})
 
     stats_query = select(func.count(Review.id), func.avg(Review.rating)).where(Review.book_id == book_id)
     stats_result = await db.execute(stats_query)

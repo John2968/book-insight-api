@@ -103,7 +103,7 @@ uvicorn app.main:app --reload
 ## Testing
 
 ```bash
-pytest
+.venv\Scripts\python -m pytest
 ```
 
 Runs tests for auth (register/login/me), authors/books CRUD, and reviews/analytics. Uses an in-memory SQLite database.
@@ -111,7 +111,8 @@ Runs tests for auth (register/login/me), authors/books CRUD, and reviews/analyti
 ## API documentation
 
 - **Interactive**: Open `http://127.0.0.1:8000/api/v1/docs` when the server is running.
-- **Markdown (for PDF)**: See `docs/api-documentation.md`. Export to PDF (e.g. VS Code “Markdown PDF” or Pandoc) and submit/link as required.
+- **Markdown source**: See `docs/api-documentation.md`.
+- **Submission artifact**: Export the Markdown file to `docs/api-documentation.pdf` (e.g. VS Code “Markdown PDF” or Pandoc) and include that PDF in the repository / submission materials.
 
 ## Data source
 

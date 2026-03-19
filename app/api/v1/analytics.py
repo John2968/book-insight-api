@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
@@ -67,7 +67,7 @@ async def trending_authors(
     days: int = Query(180, ge=1, le=365, description="Look-back window in days"),
     limit: int = Query(10, ge=1, le=50),
 ) -> list[dict]:
-    window_start = datetime.utcnow() - timedelta(days=days)
+    window_start = datetime.now(timezone.utc) - timedelta(days=days)
     # compare recent avg rating vs all-time avg rating as a simple "trend" score
     recent_query = (
         select(

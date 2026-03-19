@@ -13,8 +13,11 @@ import app.models  # noqa: F401  # ensure all model modules are imported for met
 config = context.config
 
 # Override the sqlalchemy.url from our application settings.
-# For migrations we use a synchronous driver (strip "+aiosqlite").
-sync_url = settings.DATABASE_URL.replace("+aiosqlite", "")
+# For migrations we use a synchronous driver by stripping async driver markers.
+sync_url = (
+    settings.DATABASE_URL.replace("+aiosqlite", "")
+    .replace("+asyncpg", "")
+)
 config.set_main_option("sqlalchemy.url", sync_url)
 
 # Interpret the config file for Python logging.

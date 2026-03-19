@@ -6,6 +6,7 @@ from app.core.exceptions import not_found
 from app.core.security import get_current_active_admin
 from app.db.session import get_db
 from app.models.author import Author
+from app.models.book import Book
 from app.models.user import User
 from app.schemas.author import AuthorCreate, AuthorRead, AuthorUpdate
 
@@ -81,6 +82,12 @@ async def delete_author(
     author = result.scalar_one_or_none()
     if not author:
         raise not_found(code="AUTHOR_NOT_FOUND", message="Author not found", details={"author_id": author_id})
+
+    books_result = await db.execute(select(Book).where(Book.author_id == author_id))
+    books = books_result.scalars().all()
+    for book in books:
+        book.author_id = None
+
     await db.delete(author)
     await db.commit()
 

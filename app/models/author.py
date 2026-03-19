@@ -10,5 +10,5 @@ class Author(Base):
     country: Mapped[str | None] = mapped_column(String(100), nullable=True)
     biography: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    books: Mapped[list["Book"]] = relationship("Book", back_populates="author", cascade="all, delete-orphan")
+    books: Mapped[list["Book"]] = relationship("Book", back_populates="author")
 
