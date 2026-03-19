@@ -16,7 +16,7 @@ A FastAPI-based REST API for managing books, authors, reviews, reading lists, an
 ### 1. Clone and setup
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/John2968/book-insight-api.git
 cd book-insight-api
 python -m venv .venv
 ```
