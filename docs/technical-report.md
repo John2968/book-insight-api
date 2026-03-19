@@ -28,9 +28,10 @@ This report covers data sources and data modelling, architecture and technology 
 
 **Data sources for populating the database:**
 1. **Seed script** (`scripts/load_sample_data.py`): creates demo users (e.g. admin, alice), authors, books, and reviews for testing authentication and review flows.
-2. **CSV import** (`scripts/import_books_from_csv.py`): imports books from a CSV file and creates authors by name (deduplicated). The repository includes `data/raw/sample_books.csv` (15 books with title, authors, average_rating, ratings_count, publication_date, genre). The same script can be used with larger public datasets (e.g. [Kaggle Goodreads books](https://www.kaggle.com/datasets)): the user downloads the CSV, places it in `data/raw/`, and runs the script. Any such dataset should be cited and used in accordance with its licence.
+2. **Public dataset import** (`scripts/import_books_from_csv.py`): imports books from a CSV file and creates authors by name (deduplicated, with ISBN-based duplicate checks).
+3. **Bundled public dataset** (`data/raw/open_library_books.csv`): a curated 20-book CSV generated from the **Open Library Search API** by `scripts/fetch_open_library_dataset.py`. It contains real public metadata fields such as title, author, first publication year, ISBN, ratings average, and ratings count, mapped into this project's book schema.
 
-**External data**: Google Books and Open Library are listed in the project scope for future enrichment (e.g. descriptions, cover images, ISBNs). They are not integrated in the current implementation; the design allows additional metadata to be added to existing book records later.
+**External data source used in this implementation:** The project uses **Open Library** as the real public metadata source for the bundled CSV dataset. Open Library provides open bibliographic data through its Search API (`https://openlibrary.org/search.json`) and states that it does not assert copyright over the database material; many records are public-domain or contributed as open data. In this project, Open Library is used as an offline import source rather than a live runtime dependency: records are fetched once, normalised into a project-specific CSV, and then imported into the local database.
 
 ---
 

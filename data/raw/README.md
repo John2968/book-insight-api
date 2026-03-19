@@ -1,28 +1,39 @@
 # Raw data directory
 
-Place your books CSV file here for import.
+Place CSV files here for import.
 
-## Recommended public dataset: Goodreads (Kaggle)
+## Default bundled dataset
 
-- **Kaggle – Goodreads-books (various versions)**  
-  Example: [Goodreads Books Dataset](https://www.kaggle.com/datasets/ayushiiisahu/goodreads-books-dataset) or search Kaggle for "goodreads books".
-- After downloading, save the CSV as `books.csv` in this folder (or use the path when running the import script).
-- Supported columns (names are flexible): `title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `language_code`, `num_pages`, `publication_date`, `genre` (or `main_genre`). The importer maps the first author in `authors` to the Author table.
+The repository includes `open_library_books.csv`, a curated 20-book export from the **Open Library Search API**:
 
-## Quick start (no download)
+- API docs: [Open Library Search API](https://openlibrary.org/dev/docs/api/search)
+- Licensing note: [Open Library Developers / Licensing](https://openlibrary.org/developers/licensing)
+- Export script: `scripts/fetch_open_library_dataset.py`
 
-The repo includes `sample_books.csv` with a small set of books. Run:
+To regenerate the bundled dataset:
+
+```bash
+python scripts/fetch_open_library_dataset.py
+```
+
+To import it into the database:
 
 ```bash
 python scripts/import_books_from_csv.py
 ```
 
-That uses `data/raw/sample_books.csv` by default. To use your own file:
+That uses `data/raw/open_library_books.csv` by default.
+
+## Using your own CSV
+
+You can also place another file here and import it explicitly:
 
 ```bash
 python scripts/import_books_from_csv.py data/raw/books.csv
 ```
 
-## Licence
+Supported columns (names are flexible): `title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `language_code`, `num_pages`, `publication_date`, `genre` (or `main_genre`). The importer maps the first author in `authors` to the Author table.
 
-If you use a Kaggle or other third-party dataset, ensure it is used in line with its licence and cite the source in your technical report.
+## Licence and citation
+
+Open Library states that it does not assert copyright over the database material and that many records are public-domain or contributed as open data. Cite Open Library as the source of the bundled dataset in your technical report and submission materials.

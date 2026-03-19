@@ -65,21 +65,29 @@ python scripts/load_sample_data.py
 
 Sample users: **admin** / `admin123`, **alice** / `password123`.
 
-**Option B – Import books from a CSV (public-dataset style):**
+**Option B – Import books from a real public dataset export:**
 
-The repo includes a small `data/raw/sample_books.csv` (15 books). To import it:
+The repo includes `data/raw/open_library_books.csv`, a curated 20-book subset exported from the **Open Library Search API**. It contains real public book metadata mapped into this project's schema (`title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `publication_date`, `genre`).
+
+To import the bundled Open Library dataset:
 
 ```bash
 python scripts/import_books_from_csv.py
 ```
 
-To use your own CSV (e.g. from [Kaggle Goodreads datasets](https://www.kaggle.com/datasets)), place the file in `data/raw/` and run:
+To regenerate the bundled dataset from Open Library:
+
+```bash
+python scripts/fetch_open_library_dataset.py
+```
+
+To use your own CSV instead, place the file in `data/raw/` and run:
 
 ```bash
 python scripts/import_books_from_csv.py data/raw/books.csv
 ```
 
-Supported columns: `title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `publication_date`, `genre`. See `data/raw/README.md` for details and licence/citation.
+Supported columns: `title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `publication_date`, `genre`. See `data/raw/README.md` for source, licence, and citation details.
 
 ### 6. Run the API
 
@@ -104,6 +112,12 @@ Runs tests for auth (register/login/me), authors/books CRUD, and reviews/analyti
 
 - **Interactive**: Open `http://127.0.0.1:8000/api/v1/docs` when the server is running.
 - **Markdown (for PDF)**: See `docs/api-documentation.md`. Export to PDF (e.g. VS Code “Markdown PDF” or Pandoc) and submit/link as required.
+
+## Data source
+
+- **Bundled dataset**: `data/raw/open_library_books.csv`
+- **Origin**: exported from the [Open Library Search API](https://openlibrary.org/dev/docs/api/search) using `scripts/fetch_open_library_dataset.py`
+- **Licence / reuse**: Open Library states that it does not assert copyright over the database material and many records are public-domain / CC0-style open data; cite Open Library in your report and submission materials
 
 ## Deployment (e.g. Render / Railway)
 

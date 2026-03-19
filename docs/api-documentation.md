@@ -6,6 +6,11 @@
 - **API prefix**: `/api/v1`
 - **Authentication**: JWT Bearer token in header: `Authorization: Bearer <access_token>`
 - **Interactive docs**: `http://127.0.0.1:8000/api/v1/docs` (Swagger UI), `http://127.0.0.1:8000/api/v1/redoc` (ReDoc)
+- **Bundled demo/public dataset**: `data/raw/open_library_books.csv`, generated from the [Open Library Search API](https://openlibrary.org/dev/docs/api/search) via `scripts/fetch_open_library_dataset.py`
+
+### 1.0 Data source note
+
+The repository includes a real public dataset export rather than a hand-written demo CSV. `data/raw/open_library_books.csv` is a curated subset of Open Library metadata mapped into this API's import format. By default, `scripts/import_books_from_csv.py` imports this file.
 
 ### 1.1 Error response format
 

@@ -6,8 +6,9 @@ ratings_count, publication_date, genre (or main_genre). Column names are
 case-insensitive and flexible (e.g. "Authors" or "authors").
 
 Usage:
-  python scripts/import_books_from_csv.py                    # uses data/raw/sample_books.csv
-  python scripts/import_books_from_csv.py data/raw/books.csv # use your own CSV
+  python scripts/import_books_from_csv.py                          # uses data/raw/open_library_books.csv
+  python scripts/import_books_from_csv.py data/raw/open_library_books.csv
+  python scripts/import_books_from_csv.py data/raw/books.csv       # use your own CSV
 """
 import asyncio
 import csv
@@ -28,7 +29,7 @@ from app.db.session import AsyncSessionLocal
 from app.models import Author, Book
 
 
-DEFAULT_CSV = REPO_ROOT / "data" / "raw" / "sample_books.csv"
+DEFAULT_CSV = REPO_ROOT / "data" / "raw" / "open_library_books.csv"
 
 
 def _normalize_headers(row: dict) -> dict:
@@ -110,13 +111,19 @@ async def main() -> None:
                 title = _column(row, "title")
                 if not title:
                     continue
-                authors_str = _column(row, "authors", "author")
-                first_author_name = authors_str.split(",")[0].strip() if authors_str else "Unknown"
-                author = await get_or_create_author(session, first_author_name)
                 isbn_raw = _column(row, "isbn", "isbn13")
                 isbn = isbn_raw[:20] if isbn_raw else None
                 if isbn and not isbn.isdigit() and not isbn.replace("-", "").isdigit():
                     isbn = None
+                if isbn:
+                    existing_by_isbn = await session.execute(
+                        select(Book).where(Book.isbn == isbn)
+                    )
+                    if existing_by_isbn.scalar_one_or_none():
+                        continue
+                authors_str = _column(row, "authors", "author")
+                first_author_name = authors_str.split(",")[0].strip() if authors_str else "Unknown"
+                author = await get_or_create_author(session, first_author_name)
                 pub_date = _parse_date(_column(row, "publication_date", "publication year", "year"))
                 genre = _column(row, "genre", "main_genre", "categories")
                 avg_rating = _float(_column(row, "average_rating", "rating"))
