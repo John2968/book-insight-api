@@ -65,7 +65,7 @@ Version control was managed through Git, with the project stored in a public Git
 
 ## 6. Use of Generative AI
 
-Generative AI was used in line with the module's Green Light policy. The detailed declaration is provided in `docs/genai-declaration.md`, but the overall pattern of use can be summarised briefly here.
+Generative AI was used in line with the module's Green Light policy. The formal declaration is included in **Appendix A** of this report, and selected exported AI conversation logs are included in **Appendix B**.
 
 AI assistance was used to explore alternative API structures, compare architectural options, draft implementation scaffolding, improve error-handling consistency, generate and refine automated tests, and improve the organisation of the written documentation. AI support was also useful when troubleshooting dependency issues and evaluating how best to present the data-ingestion approach using a real public dataset.
 
@@ -92,11 +92,57 @@ There are several realistic directions for future improvement. The system could 
 
 ---
 
-## Appendix A: Supporting Materials
+## Appendix A: GenAI Declaration
 
-- **Repository**: [https://github.com/John2968/book-insight-api](https://github.com/John2968/book-insight-api)
-- **Live API**: [https://book-insight-api.onrender.com](https://book-insight-api.onrender.com)
-- **Live API documentation**: [https://book-insight-api.onrender.com/api/v1/docs](https://book-insight-api.onrender.com/api/v1/docs)
-- **Written API documentation**: `docs/api-documentation.md` (export to PDF for submission)
-- **Generative AI declaration**: `docs/genai-declaration.md`
-- **Presentation slides**: submitted separately as the accompanying PPTX deck or linked in the final submission form, as required by the module
+I declare that I used Generative AI tools in this assessment in accordance with the module's Green Light policy. The tools were used to support design exploration, implementation drafting, debugging, testing, and documentation improvement. All final technical decisions, code selection, verification steps, and submitted wording remained my own responsibility.
+
+### Tools Used
+
+| Tool / product | Purpose |
+|----------------|---------|
+| Cursor (AI-assisted editor) | Exploring endpoint structure, drafting FastAPI routes and schemas, reviewing database and authentication patterns, generating and refining tests, improving documentation structure, and helping draft the technical report and declaration. |
+| Other conversational AI tools (used occasionally) | Clarifying framework behaviour, reviewing wording, and discussing implementation alternatives before selecting the final approach. |
+
+### How GenAI Was Used
+
+- **Design and architecture:** AI was used to compare API structures, discuss endpoint naming, explore error-response standardisation, and reason about how to combine CRUD functionality with analytics and recommendation endpoints.
+- **Implementation support:** AI provided draft code patterns for FastAPI dependency injection, JWT-based authentication, SQLAlchemy models, CRUD handlers, CSV ingestion utilities, and exception helpers. These suggestions were adapted, corrected, and integrated selectively.
+- **Testing and debugging:** AI was used to draft test ideas and help diagnose issues such as dependency installation problems, async fixture setup, database session isolation, and validation behaviour.
+- **Documentation:** AI supported the drafting and restructuring of the README, API documentation, technical report, and declaration so that the project could be presented more clearly and professionally.
+
+### My Own Contribution
+
+- I selected the project topic, defined the final scope, and chose the technology stack.
+- I decided the final data model, security model, endpoint set, and deployment strategy.
+- I reviewed all AI-generated suggestions before using them and rejected or changed outputs that did not match the coursework requirements or actual runtime behaviour.
+- I ran the application, verified the API behaviour, executed the tests, and corrected implementation issues where necessary.
+- I take responsibility for the correctness of the submitted code and documents.
+
+### Verification and Limitations
+
+- AI suggestions were treated as draft support rather than as authoritative answers.
+- I checked AI-assisted outputs against framework documentation, runtime results, and the coursework brief.
+- Where AI suggestions were inaccurate, incomplete, or poorly matched to the project, I revised them before keeping them.
+- AI did not replace my own understanding of the system; it was used to accelerate iteration and improve quality.
+
+### Signature
+
+**Name:** ____________________  
+**Student ID:** ____________________  
+**Signed:** ____________________  
+**Date:** ____________________  
+
+---
+
+## Appendix B: Selected AI Conversation Logs
+
+This appendix should contain selected exported conversation excerpts that demonstrate how Generative AI was used during the project. The chosen examples should illustrate meaningful technical support rather than routine prompting only.
+
+Recommended examples to include:
+
+- exploration of API structure, endpoint grouping, or authentication design
+- discussion of public dataset selection and import workflow
+- debugging of testing, validation, or deployment issues
+- refinement of documentation, technical report structure, or submission preparation
+
+When preparing the final PDF, insert a small number of representative exported logs, screenshots, or transcript extracts here. Redact any secrets, private tokens, or unnecessary personal details before submission.

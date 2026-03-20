@@ -162,7 +162,7 @@ The main report-style files for submission are:
 
 - `docs/technical-report.md` -> export to `docs/technical-report.pdf`
 - `docs/api-documentation.md` -> export to `docs/api-documentation.pdf`
-- `docs/genai-declaration.md` -> include as an appendix or separate PDF if required
+- include the GenAI declaration and selected AI conversation logs in the appendices of `docs/technical-report.pdf`
 - presentation slides in PPTX format
 
 ## Project Structure

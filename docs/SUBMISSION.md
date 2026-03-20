@@ -6,7 +6,7 @@ Complete the following steps before submitting on Minerva.
 
 - Export `docs/technical-report.md` to `docs/technical-report.pdf`.
 - Keep the final PDF within the module page limit.
-- Include the Generative AI declaration as an appendix if the brief expects it inside the same PDF.
+- Include the Generative AI declaration and selected AI conversation logs as appendices inside the same PDF.
 - Ensure the report still contains the correct repository and deployment links:
   - Repository: `https://github.com/John2968/book-insight-api`
   - Live API: `https://book-insight-api.onrender.com`
@@ -20,9 +20,11 @@ pandoc docs/technical-report.md -o docs/technical-report.pdf
 
 ## 2. Generative AI Declaration
 
-- Include `docs/genai-declaration.md` in the submission, either inside the technical report PDF appendix or as a separate PDF if required.
+- Make sure the final technical report PDF includes:
+  - `Appendix A: GenAI Declaration`
+  - `Appendix B: Selected AI Conversation Logs`
 - Add your name, student ID, signature, and date before exporting.
-- Attach sample exported AI conversation logs if the module requires supplementary evidence.
+- If Minerva allows supplementary uploads, you may also upload the original exported conversation files separately.
 
 ## 3. API Documentation PDF
 
