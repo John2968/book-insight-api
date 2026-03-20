@@ -17,7 +17,7 @@ I declare that I used Generative AI tools in this assessment in accordance with 
 | Tool / product | Purpose |
 |----------------|---------|
 | Cursor (AI-assisted editor) | Exploring endpoint structure, drafting FastAPI routes and schemas, reviewing database and authentication patterns, generating and refining tests, improving documentation structure, and helping draft the technical report and declaration. |
-| Other conversational AI tools (used occasionally) | Clarifying framework behaviour, reviewing wording, and discussing implementation alternatives before selecting the final approach. |
+| ChatGPT (used occasionally) | Clarifying framework behaviour, reviewing wording, and discussing implementation alternatives before selecting the final approach. |
 
 ---
 
