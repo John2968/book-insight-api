@@ -1,9 +1,5 @@
 # Technical Report: Book Metadata, Review & Insight API
 
-**Module**: COMP3011 Web Services and Web Data  
-**Coursework**: 1 - Individual Web Services API Development Project  
-
----
 
 ## 1. Introduction
 
