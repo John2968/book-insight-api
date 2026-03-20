@@ -136,7 +136,7 @@ I declare that I used Generative AI tools in this assessment in accordance with 
 
 ## Appendix B: Selected AI Conversation Logs
 
-The following examples summarise selected conversations that show how I used Generative AI throughout the project. They are presented in a simple question-and-answer form to reflect the actual style of interaction used during planning, implementation, debugging, deployment, and submission preparation. Original exported logs can be provided separately as supplementary material if required.
+The following examples summarise selected conversations that show how I used Generative AI throughout the project. They are presented in a simple question-and-answer form to reflect the actual style of interaction used during planning, implementation, debugging, deployment, and submission preparation.
 
 ### B1. Choosing the Project Direction
 
