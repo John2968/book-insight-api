@@ -136,66 +136,52 @@ I declare that I used Generative AI tools in this assessment in accordance with 
 
 ## Appendix B: Selected AI Conversation Logs
 
-The following examples summarise selected AI-assisted conversations from the development process. They were chosen because they show substantive use of Generative AI for design exploration, dataset planning, debugging, and submission preparation rather than simple code autocompletion only. Original exported logs can be provided separately as supplementary material if required.
+The following examples summarise selected conversations that show how I used Generative AI throughout the project. They are presented in a simple question-and-answer form to reflect the actual style of interaction used during planning, implementation, debugging, deployment, and submission preparation. Original exported logs can be provided separately as supplementary material if required.
 
-### B1. Project Scoping and Architecture Planning
+### B1. Choosing the Project Direction
 
-**User request (translated summary):** The project topic was fixed as a Book Metadata and Review Analytics API, with the explicit goal of targeting the highest GenAI usage band in the marking rubric. The user requested a full end-to-end plan rather than isolated code snippets.
+**Question:** How can this project be shaped so that it aims for a high mark in both technical quality and GenAI usage, rather than being only a minimal CRUD API?
 
-**AI contribution:** The conversation explored suitable architecture choices and proposed a modern stack built around FastAPI, SQLAlchemy, Alembic, JWT authentication, PostgreSQL deployment, analytics endpoints, and public dataset integration. The AI also suggested structuring the work into phases such as core setup, data modelling, CRUD implementation, analytics, testing, deployment, and documentation.
+**Answer:** The AI suggested framing the work as a complete Book Metadata and Review Analytics API rather than a simple CRUD exercise. It recommended planning the project in stages, including architecture, data modelling, CRUD resources, analytics, testing, deployment, and documentation. This discussion informed the final scope of the project and encouraged the inclusion of higher-value features such as analytics and recommendations.
 
-**Outcome in the project:** This planning conversation directly influenced the final stack choice and the inclusion of advanced features beyond minimum CRUD, including analytics routes, recommendations, deployment, and formal documentation.
+### B2. Deciding the Technical Stack
 
-### B2. Public Dataset Selection and Import Workflow
+**Question:** Which technology stack would be most suitable if the API needed to be modern, well documented, easy to demonstrate, and suitable for deployment?
 
-**User request (translated summary):** The user asked whether the project used a real dataset and then requested that the project be switched to a genuine public data source suitable for submission.
+**Answer:** The AI compared possible options and recommended FastAPI, SQLAlchemy, Alembic, JWT authentication, SQLite for local development, and PostgreSQL for deployment. It also explained that this stack would support automatic API documentation, modular code structure, testing, and hosted deployment. This was consistent with the final implementation described in the main report.
 
-**AI contribution:** The conversation evaluated options and recommended moving away from a purely hand-written sample dataset toward Open Library as a public metadata source. AI support was then used to help design:
+### B3. Planning the Data Model and Endpoint Structure
 
-- `scripts/fetch_open_library_dataset.py` to fetch and normalise a curated book list
-- `data/raw/open_library_books.csv` as the bundled public dataset
-- `scripts/import_books_from_csv.py` to import records into the SQL database with duplicate handling
-- `scripts/seed_demo_users_and_reviews.py` to add only demonstration user activity on top of real imported books
+**Question:** How should the project be broken down into entities and endpoints so that the API feels complete rather than fragmented?
 
-**Outcome in the project:** The final repository now uses Open Library as the cited metadata source and includes a reproducible import pipeline rather than relying on purely artificial source data.
+**Answer:** The AI suggested a relational design based on `User`, `Author`, `Book`, `Review`, and `ReadingListEntry`, together with REST endpoints for authentication, books, authors, reviews, reading lists, and analytics. It also recommended features such as pagination, filtering, sorting, rating distributions, and personalised recommendations. This aligned with the final API design and helped structure the service beyond the minimum endpoint requirement.
 
-### B3. Debugging, Dependency Fixes, and Test Stabilisation
+### B4. Finding and Integrating a Real Public Dataset
 
-**User request (translated summary):** During development, the user repeatedly shared runtime and installation failures, including missing packages, migration problems, and test-environment issues.
+**Question:** What would be a better dataset strategy than relying only on hand-written sample data?
 
-**Representative issues discussed with AI assistance:**
+**Answer:** The AI suggested using a genuine public metadata source and helped evaluate a workflow in which data could be fetched, normalised, stored in CSV form, and imported into the application database. This discussion supported the decision to use Open Library as the public metadata source and to implement the workflow around `scripts/fetch_open_library_dataset.py`, `data/raw/open_library_books.csv`, and `scripts/import_books_from_csv.py`.
 
-- `ModuleNotFoundError: No module named 'aiosqlite'`
-- `ImportError: email-validator is not installed`
-- Alembic migration configuration and missing table creation
-- `pytest-asyncio` fixture problems and isolated test session issues
-- duplicate ISBN validation and API error-format consistency
+### B5. Rethinking the Seeding Strategy
 
-**AI contribution:** The AI helped diagnose causes, suggest corrective changes, and organise verification steps. This included refining dependency versions, fixing migration imports, updating validation and exception handling, and adding behaviour-focused tests for permissions, analytics, and structured errors.
+**Question:** After adopting a real public dataset, how can demonstration data still be used without implying that every part of the database is fully real?
 
-**Outcome in the project:** The final codebase contains a stable automated test suite, unified error responses, and reproducible setup instructions. At the point of final verification, the automated tests passed successfully.
+**Answer:** The AI suggested separating real imported book metadata from optional demonstration user behaviour. Instead of inventing the whole dataset, it recommended keeping the books real and adding only a small number of example users and reviews for testing and presentation. This matches the final use of `scripts/seed_demo_users_and_reviews.py`, which adds demo activity on top of imported public books.
 
-### B4. Deployment and Submission Preparation
+### B6. Debugging Dependencies, Migrations, and Runtime Errors
 
-**User request (translated summary):** After the API was implemented, the focus shifted to deployment on Render and preparing the final submission materials so that the repository, report, API documentation, and oral presentation would all align with the coursework brief.
+**Question:** How should the runtime and installation errors encountered during development be interpreted and fixed?
 
-**AI contribution:** The AI was used to reason through:
+**Answer:** The AI helped narrow down issues such as missing packages like `aiosqlite` and `email-validator`, Alembic migration problems, requirements-file encoding issues, and password-hashing compatibility warnings. It helped reason from the traceback to likely causes and suggested specific fixes to test. These exchanges supported the final stable setup process described elsewhere in the report.
 
-- Render deployment steps and environment variables such as `DATABASE_URL`, `JWT_SECRET_KEY`, and `ENV`
-- the difference between local SQLite development and deployed PostgreSQL usage
-- how to make the live API demonstrable through Swagger UI and ReDoc
-- how to restructure the technical report so that the GenAI declaration appears inside the report appendices
-- what submission artifacts still needed to be created, including PDF exports, PPTX slides, and appended AI conversation evidence
+### B7. Improving Tests and Error Handling
 
-**Outcome in the project:** The deployed service became accessible online, the technical report and API documentation were rewritten into submission-ready forms, and the final report structure now includes `Appendix A: GenAI Declaration` and `Appendix B: Selected AI Conversation Logs`.
+**Question:** How can the API be made stronger in terms of testing and error handling, rather than only implementing the happy path?
 
-### B5. Reflection on GenAI Use
+**Answer:** The AI suggested writing tests for authentication, CRUD flows, analytics, permission checks, validation behaviour, and error formatting. It also supported the idea of returning a consistent error-response shape so that code, tests, and documentation would align. This was consistent with the final pytest suite and the unified error format used across the API.
 
-These selected conversations show that Generative AI was used at several levels:
+### B8. Deployment and Final Submission Preparation
 
-- for high-level planning and architectural comparison
-- for identifying and integrating a suitable public dataset
-- for debugging and iterative testing
-- for improving documentation quality and submission structure
+**Question:** Once the API was working, how should the final stage of the project be handled in terms of deployment, documentation, and submission preparation?
 
-This pattern of use goes beyond simple low-level code generation. It demonstrates reflective and methodical use of AI throughout design, implementation, validation, and presentation preparation.
+**Answer:** The AI helped reason through Render deployment, environment variables, the difference between local SQLite and deployed PostgreSQL, how to use Swagger UI and ReDoc for demonstration, and how to restructure the technical report so that the GenAI declaration and selected conversation evidence would appear in the appendices. This supported the final deployment and the submission-ready report structure described in this document.
