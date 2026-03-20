@@ -27,7 +27,7 @@ This report covers data sources and data modelling, architecture and technology 
 - **ReadingListEntry**: id, user_id, book_id, added_at. A unique constraint on (user_id, book_id) prevents duplicate entries per user.
 
 **Data sources for populating the database:**
-1. **Seed script** (`scripts/load_sample_data.py`): creates demo users (e.g. admin, alice), authors, books, and reviews for testing authentication and review flows.
+1. **Demo seed script** (`scripts/seed_demo_users_and_reviews.py`): creates demo users (e.g. admin, alice) and attaches review activity to imported public books for testing authentication and review flows.
 2. **Public dataset import** (`scripts/import_books_from_csv.py`): imports books from a CSV file and creates authors by name (deduplicated, with ISBN-based duplicate checks).
 3. **Bundled public dataset** (`data/raw/open_library_books.csv`): a curated 20-book CSV generated from the **Open Library Search API** by `scripts/fetch_open_library_dataset.py`. It contains real public metadata fields such as title, author, first publication year, ISBN, ratings average, and ratings count, mapped into this project's book schema.
 

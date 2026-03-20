@@ -57,10 +57,10 @@ alembic upgrade head
 
 ### 5. Load data (optional)
 
-**Option A – Demo users and a few books/reviews (for testing auth and reviews):**
+**Option A – Seed demo users and reviews on top of the imported public book dataset (for testing auth and reviews):**
 
 ```bash
-python scripts/load_sample_data.py
+python scripts/seed_demo_users_and_reviews.py
 ```
 
 Sample users: **admin** / `admin123`, **alice** / `password123`.
@@ -145,7 +145,7 @@ book-insight-api/
 │   ├── schemas/         # Pydantic request/response models
 │   └── main.py          # FastAPI application
 ├── alembic/             # Database migrations
-├── scripts/              # e.g. load_sample_data.py
+├── scripts/              # e.g. import/export and demo seeding scripts
 ├── tests/                # Pytest tests
 ├── docs/                 # API documentation (Markdown), technical report
 ├── requirements.txt

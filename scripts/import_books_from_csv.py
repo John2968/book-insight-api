@@ -93,59 +93,69 @@ async def get_or_create_author(session: AsyncSession, name: str) -> Author:
     return author
 
 
-async def main() -> None:
-    csv_path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_CSV
+def resolve_csv_path(path_arg: str | None = None) -> Path:
+    csv_path = Path(path_arg) if path_arg else DEFAULT_CSV
     if not csv_path.is_absolute():
         csv_path = REPO_ROOT / csv_path
+    return csv_path
+
+
+async def import_books_from_csv(session: AsyncSession, csv_path: Path) -> int:
+    created_books = 0
+    with open(csv_path, newline="", encoding="utf-8", errors="replace") as f:
+        reader = csv.DictReader(f)
+        for raw in reader:
+            row = _normalize_headers(raw)
+            title = _column(row, "title")
+            if not title:
+                continue
+            isbn_raw = _column(row, "isbn", "isbn13")
+            isbn = isbn_raw[:20] if isbn_raw else None
+            if isbn and not isbn.isdigit() and not isbn.replace("-", "").isdigit():
+                isbn = None
+            if isbn:
+                existing_by_isbn = await session.execute(
+                    select(Book).where(Book.isbn == isbn)
+                )
+                if existing_by_isbn.scalar_one_or_none():
+                    continue
+            authors_str = _column(row, "authors", "author")
+            first_author_name = authors_str.split(",")[0].strip() if authors_str else "Unknown"
+            author = await get_or_create_author(session, first_author_name)
+            pub_date = _parse_date(_column(row, "publication_date", "publication year", "year"))
+            genre = _column(row, "genre", "main_genre", "categories")
+            avg_rating = _float(_column(row, "average_rating", "rating"))
+            ratings_count = _int(_column(row, "ratings_count", "ratings count", "num_ratings"))
+
+            existing = await session.execute(
+                select(Book).where(Book.title == title, Book.author_id == author.id)
+            )
+            if existing.scalar_one_or_none():
+                continue
+            book = Book(
+                title=title[:200],
+                author_id=author.id,
+                isbn=isbn,
+                publication_date=pub_date,
+                main_genre=genre[:100] if genre else None,
+                average_rating=avg_rating,
+                ratings_count=ratings_count,
+            )
+            session.add(book)
+            created_books += 1
+    await session.commit()
+    return created_books
+
+
+async def main() -> None:
+    csv_path = resolve_csv_path(sys.argv[1] if len(sys.argv) > 1 else None)
     if not csv_path.exists():
         print(f"CSV not found: {csv_path}")
         print("Usage: python scripts/import_books_from_csv.py [path/to/books.csv]")
         sys.exit(1)
 
     async with AsyncSessionLocal() as session:
-        created_books = 0
-        with open(csv_path, newline="", encoding="utf-8", errors="replace") as f:
-            reader = csv.DictReader(f)
-            for raw in reader:
-                row = _normalize_headers(raw)
-                title = _column(row, "title")
-                if not title:
-                    continue
-                isbn_raw = _column(row, "isbn", "isbn13")
-                isbn = isbn_raw[:20] if isbn_raw else None
-                if isbn and not isbn.isdigit() and not isbn.replace("-", "").isdigit():
-                    isbn = None
-                if isbn:
-                    existing_by_isbn = await session.execute(
-                        select(Book).where(Book.isbn == isbn)
-                    )
-                    if existing_by_isbn.scalar_one_or_none():
-                        continue
-                authors_str = _column(row, "authors", "author")
-                first_author_name = authors_str.split(",")[0].strip() if authors_str else "Unknown"
-                author = await get_or_create_author(session, first_author_name)
-                pub_date = _parse_date(_column(row, "publication_date", "publication year", "year"))
-                genre = _column(row, "genre", "main_genre", "categories")
-                avg_rating = _float(_column(row, "average_rating", "rating"))
-                ratings_count = _int(_column(row, "ratings_count", "ratings count", "num_ratings"))
-
-                existing = await session.execute(
-                    select(Book).where(Book.title == title, Book.author_id == author.id)
-                )
-                if existing.scalar_one_or_none():
-                    continue
-                book = Book(
-                    title=title[:200],
-                    author_id=author.id,
-                    isbn=isbn,
-                    publication_date=pub_date,
-                    main_genre=genre[:100] if genre else None,
-                    average_rating=avg_rating,
-                    ratings_count=ratings_count,
-                )
-                session.add(book)
-                created_books += 1
-        await session.commit()
+        created_books = await import_books_from_csv(session, csv_path)
     print(f"Import complete: {created_books} book(s) from {csv_path.name}.")
 
 
