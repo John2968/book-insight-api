@@ -136,13 +136,66 @@ I declare that I used Generative AI tools in this assessment in accordance with 
 
 ## Appendix B: Selected AI Conversation Logs
 
-This appendix should contain selected exported conversation excerpts that demonstrate how Generative AI was used during the project. The chosen examples should illustrate meaningful technical support rather than routine prompting only.
+The following examples summarise selected AI-assisted conversations from the development process. They were chosen because they show substantive use of Generative AI for design exploration, dataset planning, debugging, and submission preparation rather than simple code autocompletion only. Original exported logs can be provided separately as supplementary material if required.
 
-Recommended examples to include:
+### B1. Project Scoping and Architecture Planning
 
-- exploration of API structure, endpoint grouping, or authentication design
-- discussion of public dataset selection and import workflow
-- debugging of testing, validation, or deployment issues
-- refinement of documentation, technical report structure, or submission preparation
+**User request (translated summary):** The project topic was fixed as a Book Metadata and Review Analytics API, with the explicit goal of targeting the highest GenAI usage band in the marking rubric. The user requested a full end-to-end plan rather than isolated code snippets.
 
-When preparing the final PDF, insert a small number of representative exported logs, screenshots, or transcript extracts here. Redact any secrets, private tokens, or unnecessary personal details before submission.
+**AI contribution:** The conversation explored suitable architecture choices and proposed a modern stack built around FastAPI, SQLAlchemy, Alembic, JWT authentication, PostgreSQL deployment, analytics endpoints, and public dataset integration. The AI also suggested structuring the work into phases such as core setup, data modelling, CRUD implementation, analytics, testing, deployment, and documentation.
+
+**Outcome in the project:** This planning conversation directly influenced the final stack choice and the inclusion of advanced features beyond minimum CRUD, including analytics routes, recommendations, deployment, and formal documentation.
+
+### B2. Public Dataset Selection and Import Workflow
+
+**User request (translated summary):** The user asked whether the project used a real dataset and then requested that the project be switched to a genuine public data source suitable for submission.
+
+**AI contribution:** The conversation evaluated options and recommended moving away from a purely hand-written sample dataset toward Open Library as a public metadata source. AI support was then used to help design:
+
+- `scripts/fetch_open_library_dataset.py` to fetch and normalise a curated book list
+- `data/raw/open_library_books.csv` as the bundled public dataset
+- `scripts/import_books_from_csv.py` to import records into the SQL database with duplicate handling
+- `scripts/seed_demo_users_and_reviews.py` to add only demonstration user activity on top of real imported books
+
+**Outcome in the project:** The final repository now uses Open Library as the cited metadata source and includes a reproducible import pipeline rather than relying on purely artificial source data.
+
+### B3. Debugging, Dependency Fixes, and Test Stabilisation
+
+**User request (translated summary):** During development, the user repeatedly shared runtime and installation failures, including missing packages, migration problems, and test-environment issues.
+
+**Representative issues discussed with AI assistance:**
+
+- `ModuleNotFoundError: No module named 'aiosqlite'`
+- `ImportError: email-validator is not installed`
+- Alembic migration configuration and missing table creation
+- `pytest-asyncio` fixture problems and isolated test session issues
+- duplicate ISBN validation and API error-format consistency
+
+**AI contribution:** The AI helped diagnose causes, suggest corrective changes, and organise verification steps. This included refining dependency versions, fixing migration imports, updating validation and exception handling, and adding behaviour-focused tests for permissions, analytics, and structured errors.
+
+**Outcome in the project:** The final codebase contains a stable automated test suite, unified error responses, and reproducible setup instructions. At the point of final verification, the automated tests passed successfully.
+
+### B4. Deployment and Submission Preparation
+
+**User request (translated summary):** After the API was implemented, the focus shifted to deployment on Render and preparing the final submission materials so that the repository, report, API documentation, and oral presentation would all align with the coursework brief.
+
+**AI contribution:** The AI was used to reason through:
+
+- Render deployment steps and environment variables such as `DATABASE_URL`, `JWT_SECRET_KEY`, and `ENV`
+- the difference between local SQLite development and deployed PostgreSQL usage
+- how to make the live API demonstrable through Swagger UI and ReDoc
+- how to restructure the technical report so that the GenAI declaration appears inside the report appendices
+- what submission artifacts still needed to be created, including PDF exports, PPTX slides, and appended AI conversation evidence
+
+**Outcome in the project:** The deployed service became accessible online, the technical report and API documentation were rewritten into submission-ready forms, and the final report structure now includes `Appendix A: GenAI Declaration` and `Appendix B: Selected AI Conversation Logs`.
+
+### B5. Reflection on GenAI Use
+
+These selected conversations show that Generative AI was used at several levels:
+
+- for high-level planning and architectural comparison
+- for identifying and integrating a suitable public dataset
+- for debugging and iterative testing
+- for improving documentation quality and submission structure
+
+This pattern of use goes beyond simple low-level code generation. It demonstrates reflective and methodical use of AI throughout design, implementation, validation, and presentation preparation.
