@@ -1,20 +1,24 @@
-# Book Metadata, Review & Insight API – Documentation
+# Book Metadata, Review & Insight API - API Documentation
 
 ## 1. Overview
 
-- **Base URL (local)**: `http://127.0.0.1:8000`
+- **Local base URL**: `http://127.0.0.1:8000`
+- **Deployed base URL**: `https://book-insight-api.onrender.com`
 - **API prefix**: `/api/v1`
-- **Authentication**: JWT Bearer token in header: `Authorization: Bearer <access_token>`
-- **Interactive docs**: `http://127.0.0.1:8000/api/v1/docs` (Swagger UI), `http://127.0.0.1:8000/api/v1/redoc` (ReDoc)
-- **Bundled demo/public dataset**: `data/raw/open_library_books.csv`, generated from the [Open Library Search API](https://openlibrary.org/dev/docs/api/search) via `scripts/fetch_open_library_dataset.py`
+- **Authentication**: Bearer token in the `Authorization` header
+- **Interactive documentation**:
+  - Local Swagger UI: `http://127.0.0.1:8000/api/v1/docs`
+  - Live Swagger UI: `https://book-insight-api.onrender.com/api/v1/docs`
+  - Live ReDoc: `https://book-insight-api.onrender.com/api/v1/redoc`
+- **Bundled public dataset**: `data/raw/open_library_books.csv`, generated from the [Open Library Search API](https://openlibrary.org/dev/docs/api/search)
 
-### 1.0 Data source note
+### 1.1 Data source note
 
-The repository includes a real public dataset export rather than a hand-written demo CSV. `data/raw/open_library_books.csv` is a curated subset of Open Library metadata mapped into this API's import format. By default, `scripts/import_books_from_csv.py` imports this file.
+The project includes a real public metadata export rather than a hand-written placeholder CSV. The bundled file `data/raw/open_library_books.csv` is a curated subset of Open Library data mapped into the schema expected by `scripts/import_books_from_csv.py`.
 
-### 1.1 Error response format
+### 1.2 Error response format
 
-All error responses use this structure:
+All business and validation errors are normalised to a consistent top-level shape:
 
 ```json
 {
@@ -28,7 +32,7 @@ All error responses use this structure:
 }
 ```
 
-Common error codes: `USER_EXISTS`, `INVALID_CREDENTIALS`, `AUTHOR_NOT_FOUND`, `BOOK_NOT_FOUND`, `REVIEW_NOT_FOUND`, `REVIEW_FORBIDDEN`, `READING_LIST_ENTRY_NOT_FOUND`, `READING_LIST_FORBIDDEN`, `INTERNAL_SERVER_ERROR`.
+Common error codes include `USER_EXISTS`, `INVALID_CREDENTIALS`, `AUTHOR_NOT_FOUND`, `BOOK_NOT_FOUND`, `BOOK_ISBN_EXISTS`, `REVIEW_NOT_FOUND`, `REVIEW_FORBIDDEN`, `READING_LIST_ENTRY_NOT_FOUND`, `READING_LIST_FORBIDDEN`, and `INTERNAL_SERVER_ERROR`.
 
 ---
 
@@ -36,290 +40,345 @@ Common error codes: `USER_EXISTS`, `INVALID_CREDENTIALS`, `AUTHOR_NOT_FOUND`, `B
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/v1/health/ping` | Health check. Returns `{"status": "ok"}`. |
+| GET | `/api/v1/health/ping` | Simple service health check. Returns `{"status": "ok"}`. |
 
 ---
 
-## 3. Authentication (`/auth`)
+## 3. Authentication
 
-### 3.1 Register – `POST /api/v1/auth/register`
+### 3.1 Register
 
-Creates a new user.
+- **Method**: `POST`
+- **Path**: `/api/v1/auth/register`
+- **Description**: Create a new user account.
 
-**Request (JSON):**
+Request body:
 
-- `username` (string, required, 3–50 chars)
-- `email` (string, optional, valid email)
-- `password` (string, required, 6–128 chars)
+- `username` - string, required, 3 to 50 characters
+- `email` - string, optional, valid email address
+- `password` - string, required, 6 to 128 characters
 
-**Response 201:** User object (`id`, `username`, `email`, `is_active`, `is_admin`, `created_at`).
+Successful response:
 
-**Errors:**
+- **201 Created**
+- Returns the created user object with `id`, `username`, `email`, `is_active`, `is_admin`, and `created_at`
 
-- `400 USER_EXISTS` – Username or email already registered.
+Common errors:
 
-**Example:**
+- **400** `USER_EXISTS` - username or email already registered
+- **422** validation error - request body does not satisfy schema rules
+
+### 3.2 Login
+
+- **Method**: `POST`
+- **Path**: `/api/v1/auth/login`
+- **Description**: Authenticate a user and return a JWT access token.
+
+Request format:
+
+- `application/x-www-form-urlencoded`
+- Fields: `username`, `password`
+
+Successful response:
 
 ```json
-// Request
-{"username": "alice", "email": "alice@example.com", "password": "password123"}
-
-// Response 201
-{"id": 1, "username": "alice", "email": "alice@example.com", "is_active": true, "is_admin": false, "created_at": "2026-03-18T12:00:00"}
+{
+  "access_token": "<JWT>",
+  "token_type": "bearer"
+}
 ```
 
-### 3.2 Login – `POST /api/v1/auth/login`
+Common errors:
 
-Returns a JWT access token. Use **form-url-encoded** body (not JSON).
+- **401** `INVALID_CREDENTIALS` - incorrect username or password
 
-**Request (application/x-www-form-urlencoded):**
+### 3.3 Current user
 
-- `username` (string)
-- `password` (string)
+- **Method**: `GET`
+- **Path**: `/api/v1/auth/me`
+- **Auth**: required
+- **Description**: Return the currently authenticated user.
 
-**Response 200:**
+Common errors:
 
-```json
-{"access_token": "<JWT>", "token_type": "bearer"}
-```
-
-**Errors:**
-
-- `401 INVALID_CREDENTIALS` – Incorrect username or password.
-
-### 3.3 Current user – `GET /api/v1/auth/me`
-
-Returns the authenticated user. **Requires:** `Authorization: Bearer <token>`.
-
-**Response 200:** User object (same shape as register response).
-
-**Errors:**
-
-- `401` – Missing or invalid token.
+- **401** - missing or invalid token
 
 ---
 
-## 4. Authors (`/authors`)
+## 4. Authors
 
-All author resources. Create/Update/Delete require **admin** (JWT of a user with `is_admin=true`).
+Create, update, and delete operations require an authenticated admin user.
 
-### 4.1 List authors – `GET /api/v1/authors`
+### 4.1 List authors
 
-**Query parameters:**
+- **Method**: `GET`
+- **Path**: `/api/v1/authors`
 
-- `skip` (int, default 0) – Pagination offset
-- `limit` (int, default 20, max 100) – Page size
-- `search` (string, optional) – Filter by name (substring, case-insensitive)
+Query parameters:
 
-**Response 200:** Array of author objects: `id`, `name`, `country`, `biography`.
+- `skip` - integer, default `0`
+- `limit` - integer, default `20`, maximum `100`
+- `search` - optional substring filter on author name
 
-### 4.2 Create author – `POST /api/v1/authors`
+Response:
 
-**Auth:** Admin only.
+- **200 OK**
+- Array of author objects with `id`, `name`, `country`, and `biography`
 
-**Request (JSON):**
+### 4.2 Create author
 
-- `name` (string, required, max 100)
-- `country` (string, optional, max 100)
-- `biography` (string, optional)
+- **Method**: `POST`
+- **Path**: `/api/v1/authors`
+- **Auth**: admin required
 
-**Response 201:** Author object.
+Request body:
 
-**Errors:**
+- `name` - string, required
+- `country` - string, optional
+- `biography` - string, optional
 
-- `403` – Not admin.
+Common errors:
 
-### 4.3 Get author – `GET /api/v1/authors/{author_id}`
+- **403** - insufficient permissions
+- **422** - schema validation failure
 
-**Response 200:** Author object.
+### 4.3 Get author
 
-**Errors:**
+- **Method**: `GET`
+- **Path**: `/api/v1/authors/{author_id}`
 
-- `404 AUTHOR_NOT_FOUND` – `details.author_id` given.
+Common errors:
 
-### 4.4 Update author – `PUT /api/v1/authors/{author_id}`
+- **404** `AUTHOR_NOT_FOUND`
 
-**Auth:** Admin only. Body: partial author fields (`name`, `country`, `biography`).
+### 4.4 Update author
 
-**Response 200:** Updated author object.
+- **Method**: `PUT`
+- **Path**: `/api/v1/authors/{author_id}`
+- **Auth**: admin required
 
-**Errors:**
+Common errors:
 
-- `404 AUTHOR_NOT_FOUND`, `403` if not admin.
+- **403** - insufficient permissions
+- **404** `AUTHOR_NOT_FOUND`
 
-### 4.5 Delete author – `DELETE /api/v1/authors/{author_id}`
+### 4.5 Delete author
 
-**Auth:** Admin only.
+- **Method**: `DELETE`
+- **Path**: `/api/v1/authors/{author_id}`
+- **Auth**: admin required
 
-**Response 204:** No content.
+Successful response:
 
-**Errors:**
+- **204 No Content**
 
-- `404 AUTHOR_NOT_FOUND`, `403` if not admin.
+Behaviour note:
 
----
-
-## 5. Books (`/books`)
-
-### 5.1 List books – `GET /api/v1/books`
-
-**Query parameters:**
-
-- `skip`, `limit` – Pagination
-- `search` (string) – Substring search on title
-- `author_id` (int) – Filter by author
-- `genre` (string) – Filter by `main_genre`
-- `order_by` (string) – One of: `title`, `rating`, `ratings_count` (default `title`)
-
-**Response 200:** Array of book objects: `id`, `title`, `isbn`, `publication_date`, `description`, `cover_image_url`, `main_genre`, `author_id`, `average_rating`, `ratings_count`.
-
-### 5.2 Create book – `POST /api/v1/books`
-
-**Auth:** Admin only.
-
-**Request (JSON):** `title` (required), `isbn`, `publication_date`, `description`, `cover_image_url`, `main_genre`, `author_id`, etc.
-
-**Response 201:** Book object.
-
-**Errors:**
-
-- `403` – Not admin.
-
-### 5.3 Get book – `GET /api/v1/books/{book_id}`
-
-**Response 200:** Book object.
-
-**Errors:**
-
-- `404 BOOK_NOT_FOUND` – `details.book_id` given.
-
-### 5.4 Update book – `PUT /api/v1/books/{book_id}`
-
-**Auth:** Admin only. Body: partial book fields.
-
-**Response 200:** Updated book object.
-
-**Errors:**
-
-- `404 BOOK_NOT_FOUND`, `403` if not admin.
-
-### 5.5 Delete book – `DELETE /api/v1/books/{book_id}`
-
-**Auth:** Admin only.
-
-**Response 204:** No content.
-
-**Errors:**
-
-- `404 BOOK_NOT_FOUND`, `403` if not admin.
-
-### 5.6 Recalculate book rating – `POST /api/v1/books/{book_id}/recalculate-rating`
-
-**Auth:** Admin only. Recomputes `average_rating` and `ratings_count` from all reviews for this book.
-
-**Response 200:** Updated book object.
-
-**Errors:**
-
-- `404 BOOK_NOT_FOUND`, `403` if not admin.
+- Deleting an author keeps associated books in the database and sets their `author_id` to `null`
 
 ---
 
-## 6. Reviews (`/reviews`)
+## 5. Books
 
-### 6.1 List reviews – `GET /api/v1/reviews`
+### 5.1 List books
 
-**Query parameters:**
+- **Method**: `GET`
+- **Path**: `/api/v1/books`
 
-- `skip`, `limit` – Pagination
-- `book_id` (int) – Filter by book
-- `user_id` (int) – Filter by user
+Query parameters:
 
-**Response 200:** Array of review objects: `id`, `rating`, `review_text`, `book_id`, `user_id`, `created_at`.
+- `skip` and `limit` for pagination
+- `search` for title substring matching
+- `author_id` to filter by author
+- `genre` to filter by `main_genre`
+- `order_by` with values `title`, `rating`, or `ratings_count`
 
-### 6.2 Create review – `POST /api/v1/reviews`
+Response:
 
-**Auth:** Any authenticated user. The review is tied to the current user.
+- **200 OK**
+- Array of book objects including `title`, `isbn`, `publication_date`, `main_genre`, `author_id`, `average_rating`, and `ratings_count`
 
-**Request (JSON):**
+### 5.2 Create book
 
-- `book_id` (int, required)
-- `rating` (int, required, 1–5)
-- `review_text` (string, optional)
+- **Method**: `POST`
+- **Path**: `/api/v1/books`
+- **Auth**: admin required
 
-**Response 201:** Review object. Book’s `average_rating` and `ratings_count` are updated automatically.
+Common errors:
 
-**Errors:**
+- **403** - insufficient permissions
+- **404** `AUTHOR_NOT_FOUND` - referenced author does not exist
+- **400** `BOOK_ISBN_EXISTS` - duplicate ISBN
+- **422** - schema validation failure
 
-- `404 BOOK_NOT_FOUND` – Book does not exist.
-- `401` – Not authenticated.
+### 5.3 Get book
 
-### 6.3 Update review – `PUT /api/v1/reviews/{review_id}`
+- **Method**: `GET`
+- **Path**: `/api/v1/books/{book_id}`
 
-**Auth:** Review owner or admin. Body: `rating` (1–5), `review_text`. Book stats are recalculated after update.
+Common errors:
 
-**Response 200:** Updated review object.
+- **404** `BOOK_NOT_FOUND`
 
-**Errors:**
+### 5.4 Update book
 
-- `404 REVIEW_NOT_FOUND`, `403 REVIEW_FORBIDDEN` if not owner/admin.
+- **Method**: `PUT`
+- **Path**: `/api/v1/books/{book_id}`
+- **Auth**: admin required
 
-### 6.4 Delete review – `DELETE /api/v1/reviews/{review_id}`
+Common errors:
 
-**Auth:** Review owner or admin. Book stats are recalculated after delete.
+- **403** - insufficient permissions
+- **404** `BOOK_NOT_FOUND` or `AUTHOR_NOT_FOUND`
+- **400** `BOOK_ISBN_EXISTS`
 
-**Response 204:** No content.
+### 5.5 Delete book
 
-**Errors:**
+- **Method**: `DELETE`
+- **Path**: `/api/v1/books/{book_id}`
+- **Auth**: admin required
 
-- `404 REVIEW_NOT_FOUND`, `403 REVIEW_FORBIDDEN` if not owner/admin.
+Successful response:
 
----
+- **204 No Content**
 
-## 7. Reading list (`/reading-list`)
+### 5.6 Recalculate book rating
 
-All endpoints require authentication. Operations apply to the current user’s list.
+- **Method**: `POST`
+- **Path**: `/api/v1/books/{book_id}/recalculate-rating`
+- **Auth**: admin required
+- **Description**: Recompute `average_rating` and `ratings_count` from stored reviews.
 
-### 7.1 List my reading list – `GET /api/v1/reading-list`
+Common errors:
 
-**Auth:** Required.
-
-**Query parameters:** `skip`, `limit`.
-
-**Response 200:** Array of reading list entries: `id`, `user_id`, `book_id`, `added_at`.
-
-### 7.2 Add to reading list – `POST /api/v1/reading-list`
-
-**Auth:** Required.
-
-**Request (JSON):** `book_id` (int, required). If the book is already in the list, the existing entry is returned.
-
-**Response 201:** Reading list entry object.
-
-**Errors:**
-
-- `404 BOOK_NOT_FOUND` – Book does not exist.
-- `401` – Not authenticated.
-
-### 7.3 Remove from reading list – `DELETE /api/v1/reading-list/{entry_id}`
-
-**Auth:** Required. Only the entry owner or admin can delete.
-
-**Response 204:** No content.
-
-**Errors:**
-
-- `404 READING_LIST_ENTRY_NOT_FOUND`, `403 READING_LIST_FORBIDDEN` if not owner/admin.
+- **403** - insufficient permissions
+- **404** `BOOK_NOT_FOUND`
 
 ---
 
-## 8. Analytics & recommendations (`/analytics`)
+## 6. Reviews
 
-### 8.1 Book rating distribution – `GET /api/v1/analytics/books/{book_id}/rating-distribution`
+### 6.1 List reviews
 
-Returns the count of 1–5 star ratings for the book.
+- **Method**: `GET`
+- **Path**: `/api/v1/reviews`
 
-**Response 200:**
+Query parameters:
+
+- `skip` and `limit`
+- `book_id`
+- `user_id`
+
+### 6.2 Create review
+
+- **Method**: `POST`
+- **Path**: `/api/v1/reviews`
+- **Auth**: required
+
+Request body:
+
+- `book_id` - integer, required
+- `rating` - integer, required, 1 to 5
+- `review_text` - string, optional
+
+Behaviour note:
+
+- Creating a review automatically updates the target book's derived rating fields
+
+Common errors:
+
+- **401** - not authenticated
+- **404** `BOOK_NOT_FOUND`
+- **422** - invalid rating or malformed request
+
+### 6.3 Update review
+
+- **Method**: `PUT`
+- **Path**: `/api/v1/reviews/{review_id}`
+- **Auth**: review owner or admin
+
+Behaviour note:
+
+- Updating a review recalculates the book's rating summary
+
+Common errors:
+
+- **403** `REVIEW_FORBIDDEN`
+- **404** `REVIEW_NOT_FOUND`
+
+### 6.4 Delete review
+
+- **Method**: `DELETE`
+- **Path**: `/api/v1/reviews/{review_id}`
+- **Auth**: review owner or admin
+
+Behaviour note:
+
+- Deleting a review recalculates the book's rating summary
+
+Common errors:
+
+- **403** `REVIEW_FORBIDDEN`
+- **404** `REVIEW_NOT_FOUND`
+
+---
+
+## 7. Reading List
+
+All reading-list operations apply to the currently authenticated user.
+
+### 7.1 List my reading list
+
+- **Method**: `GET`
+- **Path**: `/api/v1/reading-list`
+- **Auth**: required
+
+Query parameters:
+
+- `skip`
+- `limit`
+
+### 7.2 Add to reading list
+
+- **Method**: `POST`
+- **Path**: `/api/v1/reading-list`
+- **Auth**: required
+
+Request body:
+
+- `book_id` - integer, required
+
+Behaviour note:
+
+- If the selected book already exists in the user's reading list, the endpoint returns the existing entry rather than creating a duplicate
+
+Common errors:
+
+- **401** - not authenticated
+- **404** `BOOK_NOT_FOUND`
+
+### 7.3 Remove from reading list
+
+- **Method**: `DELETE`
+- **Path**: `/api/v1/reading-list/{entry_id}`
+- **Auth**: required
+
+Common errors:
+
+- **403** `READING_LIST_FORBIDDEN`
+- **404** `READING_LIST_ENTRY_NOT_FOUND`
+
+---
+
+## 8. Analytics and Recommendations
+
+### 8.1 Book rating distribution
+
+- **Method**: `GET`
+- **Path**: `/api/v1/analytics/books/{book_id}/rating-distribution`
+- **Description**: Return the count of 1-star to 5-star ratings for a given book.
+
+Example response:
 
 ```json
 {
@@ -334,53 +393,66 @@ Returns the count of 1–5 star ratings for the book.
 }
 ```
 
-**Errors:**
+Common errors:
 
-- `404 BOOK_NOT_FOUND` – `details.book_id` given.
+- **404** `BOOK_NOT_FOUND`
 
-### 8.2 Top rated genres – `GET /api/v1/analytics/genres/top-rated`
+### 8.2 Top-rated genres
 
-**Query parameters:**
+- **Method**: `GET`
+- **Path**: `/api/v1/analytics/genres/top-rated`
 
-- `min_ratings` (int, default 10) – Minimum number of ratings for a genre to be included
-- `limit` (int, default 10, max 50)
+Query parameters:
 
-**Response 200:** Array of objects: `genre`, `ratings_count`, `average_rating`, sorted by average rating descending.
+- `min_ratings` - integer, default `10`
+- `limit` - integer, default `10`, maximum `50`
 
-### 8.3 Trending authors – `GET /api/v1/analytics/authors/trending`
+Response:
 
-Compares recent average rating vs overall average per author (trend score).
+- Array of genre summary objects with `genre`, `ratings_count`, and `average_rating`
 
-**Query parameters:**
+### 8.3 Trending authors
 
-- `days` (int, default 180, 1–365) – Look-back window in days
-- `limit` (int, default 10, max 50)
+- **Method**: `GET`
+- **Path**: `/api/v1/analytics/authors/trending`
 
-**Response 200:** Array of objects: `author_id`, `ratings_count`, `overall_avg`, `recent_avg`, `trend_score`.
+Query parameters:
 
-### 8.4 User recommendations – `GET /api/v1/analytics/users/me/recommendations`
+- `days` - integer, default `180`
+- `limit` - integer, default `10`, maximum `50`
 
-**Auth:** Required. Returns book recommendations for the current user (content-based: preferred genres from high-rated books, or global top-rated if no reviews).
+Response:
 
-**Query parameters:**
+- Array of objects including `author_id`, `ratings_count`, `overall_avg`, `recent_avg`, and `trend_score`
 
-- `limit` (int, default 10, max 50)
+### 8.4 User recommendations
 
-**Response 200:** Array of objects: `book_id`, `title`, `average_rating`, `ratings_count`, `main_genre`.
+- **Method**: `GET`
+- **Path**: `/api/v1/analytics/users/me/recommendations`
+- **Auth**: required
+
+Description:
+
+- Returns content-based recommendations using the current user's prior high-rated genres, or global top-rated books if the user has not reviewed anything yet
+
+Response:
+
+- Array of recommendation objects with `book_id`, `title`, `average_rating`, `ratings_count`, and `main_genre`
 
 ---
 
-## 9. HTTP status codes summary
+## 9. HTTP Status Codes Summary
 
-- `200` – Success (GET, PUT, many POST responses)
-- `201` – Created (POST register, create author/book/review/reading-list entry)
-- `204` – No content (DELETE)
-- `400` – Bad request (e.g. validation, USER_EXISTS)
-- `401` – Unauthorized (missing/invalid token or credentials)
-- `403` – Forbidden (insufficient permissions)
-- `404` – Not found (resource or BOOK_NOT_FOUND, etc.)
-- `500` – Internal server error (unified error shape with code `INTERNAL_SERVER_ERROR`)
+- `200` - successful read, update, or analytical response
+- `201` - successful resource creation
+- `204` - successful deletion with no response body
+- `400` - business-rule failure such as duplicate ISBN or duplicate user
+- `401` - missing or invalid credentials
+- `403` - authenticated but not permitted
+- `404` - requested resource not found
+- `422` - request validation failure
+- `500` - unexpected internal server error
 
 ---
 
-*Export this file to PDF (e.g. via VS Code Markdown PDF or Pandoc) and place in the repository or link from the technical report as required.*
+Export this file to PDF for submission, or include the exported PDF alongside the technical report as required by the module brief.

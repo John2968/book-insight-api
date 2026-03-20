@@ -1,46 +1,63 @@
 # Submission Checklist
 
-Before submitting on Minerva, complete the following.
+Complete the following steps before submitting on Minerva.
 
-## 1. Technical Report (PDF, max 5 pages)
+## 1. Technical Report PDF
 
-- **File:** Export `docs/technical-report.md` to PDF (e.g. VS Code “Markdown PDF” or Pandoc: `pandoc docs/technical-report.md -o docs/technical-report.pdf`).
-- **In the report PDF, add:**
-  - **Repository link:** Replace `[Link to your public GitHub repository]` with your actual GitHub repo URL.
-  - **Presentation slides link:** Replace `[Link to your slides, e.g. Google Drive or OneDrive]` with the URL where your slides are hosted.
-- **Include:** The full Technical Report and, as appendix, the **Generative AI Declaration** (you can append the content of `docs/genai-declaration.md` to the same PDF, or export it separately and attach both).
+- Export `docs/technical-report.md` to `docs/technical-report.pdf`.
+- Keep the final PDF within the module page limit.
+- Include the Generative AI declaration as an appendix if the brief expects it inside the same PDF.
+- Ensure the report still contains the correct repository and deployment links:
+  - Repository: `https://github.com/John2968/book-insight-api`
+  - Live API: `https://book-insight-api.onrender.com`
+  - Live Swagger UI: `https://book-insight-api.onrender.com/api/v1/docs`
+
+Example export command:
+
+```bash
+pandoc docs/technical-report.md -o docs/technical-report.pdf
+```
 
 ## 2. Generative AI Declaration
 
-- **File:** `docs/genai-declaration.md` is filled in. Include it in the Technical Report PDF as an appendix (or submit as a separate PDF if required).
-- **Supplementary material:** Attach sample conversation logs (e.g. exported Cursor/AI chats) as required by the module. In `docs/genai-declaration.md`, replace *[Insert file names or "See appendix in submitted PDF" when you attach them.]* with the actual file names or a short note.
-- **Sign and date** the declaration as required by your module.
+- Include `docs/genai-declaration.md` in the submission, either inside the technical report PDF appendix or as a separate PDF if required.
+- Add your name, student ID, signature, and date before exporting.
+- Attach sample exported AI conversation logs if the module requires supplementary evidence.
 
-## 3. API Documentation (PDF)
+## 3. API Documentation PDF
 
-- **File:** Export `docs/api-documentation.md` to PDF (same method as above). The README should reference this (e.g. “API documentation: see `docs/api-documentation.pdf`”).
+- Export `docs/api-documentation.md` to `docs/api-documentation.pdf`.
+- Keep the exported file consistent with the deployed service and the final version of the code.
 
-## 4. Presentation Slides (PPTX)
+Example export command:
 
-- Prepare your 5-minute presentation slides (PPTX) covering: project overview, data and architecture, API highlights, testing and deployment, GenAI use, and deliverables.
-- Upload slides to a platform (e.g. Google Drive, OneDrive) and add the link in the Technical Report and on Minerva as specified.
+```bash
+pandoc docs/api-documentation.md -o docs/api-documentation.pdf
+```
 
-## 5. Minerva Submission
+## 4. Presentation Slides
 
-Submit via Minerva as specified in the coursework brief, typically:
+- Prepare the PPTX slide deck for the oral presentation.
+- Cover the required areas: project overview, architecture and data model, API documentation, version control, deployment, technical report highlights, GenAI usage, and final deliverables.
+- Submit the PPTX directly on Minerva or upload it to a sharing platform and provide the link if the module asks for a hosted copy.
 
-- Technical Report PDF (with repo link, API doc link, slides link, and GenAI declaration/appendix).
-- Presentation slides (PPTX or link).
-- Any required supplementary files (e.g. conversation log samples).
+## 5. Repository Checks
 
-## 6. GitHub Repository
+- Keep the GitHub repository public and accessible.
+- Make sure the repository contains the final source code, README, documentation files, and any exported PDFs you choose to include.
+- Confirm that the deployed Render service still starts correctly.
+- Confirm that the code in GitHub matches the version you describe in the report and slides.
 
-- Ensure the repo is **public** and contains:
-  - Versioned source code with clear commit history.
-  - `README.md` with setup and run instructions.
-  - API documentation (e.g. `docs/api-documentation.md` and/or PDF).
-  - Code that runs and matches what you present in the oral exam.
+## 6. Final Submission Pack
+
+The final submission should normally include:
+
+- Technical report PDF
+- API documentation PDF
+- PPTX presentation or presentation link, depending on the submission instructions
+- Generative AI declaration
+- Any required supplementary conversation-log evidence
 
 ---
 
-*After completing these steps, you are ready to submit.*
+Once those items are complete, the project is ready for submission.

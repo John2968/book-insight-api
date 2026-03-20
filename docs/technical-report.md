@@ -7,95 +7,96 @@
 
 ## 1. Introduction
 
-This project implements a **Book Metadata, Review & Insight API**: a data-driven REST API for managing books, authors, user reviews, reading lists, and analytical insights. The system provides standard CRUD operations, JWT-based authentication, and analytics endpoints (rating distributions, top-rated genres, trending authors, and personalised book recommendations).
+This project implements a data-driven REST API for managing book metadata, authors, user reviews, reading lists, and analytical insight endpoints. The application was designed to satisfy the coursework requirement for a complete web service that demonstrates structured API design, persistent data storage, authentication, testing, deployment, and professional documentation.
 
-**Target users** are (1) general users, who can browse books, create and manage reviews, maintain a reading list, and receive recommendations, and (2) administrators, who can create and update authors and books, recalculate book ratings, and manage content. The API is designed to be demonstrable locally or on a hosted platform and to support future integration with external metadata sources (e.g. Google Books, Open Library).
+The system supports two main user groups. General users can browse books, submit and manage reviews, maintain reading lists, and receive personalised recommendations. Administrators can create, update, and delete authors and books, as well as recalculate derived rating fields. The final implementation is available both locally and via a live Render deployment, which makes the project suitable for demonstration during the oral presentation.
 
-This report covers data sources and data modelling, architecture and technology choices, API design and implementation, testing and deployment, version control, use of Generative AI, and limitations and future work.
+This report explains the project data sources, data model, technical architecture, API design, testing strategy, deployment approach, version control practice, and use of Generative AI.
 
 ---
 
 ## 2. Data Sources and Data Modelling
 
-**Internal data** is stored in a relational database: SQLite for local development and PostgreSQL for production. The main entities are **users**, **authors**, **books**, **reviews**, and **reading_list_entries**.
+The project uses a relational data model implemented with SQLAlchemy. SQLite is used for local development and test isolation, while PostgreSQL is used for deployed hosting. The core entities are `User`, `Author`, `Book`, `Review`, and `ReadingListEntry`.
 
-**Data model and relationships:**
-- **User**: id, username, email, password_hash, is_active, is_admin, created_at. Users own reviews and reading list entries.
-- **Author**: id, name, country, biography. An author has many books (one-to-many).
-- **Book**: id, title, isbn, publication_date, description, cover_image_url, main_genre, author_id (FK to Author), average_rating, ratings_count. A book has many reviews and can appear in many users' reading lists.
-- **Review**: id, user_id, book_id, rating (1-5), review_text, created_at. Each review belongs to one user and one book; a constraint enforces rating between 1 and 5.
-- **ReadingListEntry**: id, user_id, book_id, added_at. A unique constraint on (user_id, book_id) prevents duplicate entries per user.
+The `User` entity stores identity and access-control fields such as username, email, password hash, activity status, admin role, and creation timestamp. A user can create many reviews and many reading list entries. The `Author` entity stores author-level metadata including name, country, and biography. A single author can be associated with many books. The `Book` entity stores bibliographic and analytical fields such as title, ISBN, publication date, description, cover image URL, main genre, average rating, ratings count, and a nullable foreign key to an author. The `Review` entity records the rating and review text provided by a user for a specific book, with a database constraint limiting ratings to the range 1 to 5. The `ReadingListEntry` entity links a user to a book that they wish to save, and a uniqueness constraint prevents duplicate entries for the same user-book pair.
 
-**Data sources for populating the database:**
-1. **Demo seed script** (`scripts/seed_demo_users_and_reviews.py`): creates demo users (e.g. admin, alice) and attaches review activity to imported public books for testing authentication and review flows.
-2. **Public dataset import** (`scripts/import_books_from_csv.py`): imports books from a CSV file and creates authors by name (deduplicated, with ISBN-based duplicate checks).
-3. **Bundled public dataset** (`data/raw/open_library_books.csv`): a curated 20-book CSV generated from the **Open Library Search API** by `scripts/fetch_open_library_dataset.py`. It contains real public metadata fields such as title, author, first publication year, ISBN, ratings average, and ratings count, mapped into this project's book schema.
+The application uses a real public metadata source rather than a purely hand-written dataset. The bundled dataset `data/raw/open_library_books.csv` is a curated 20-book export generated from the Open Library Search API by `scripts/fetch_open_library_dataset.py`. The import utility `scripts/import_books_from_csv.py` maps this CSV into the project schema and creates authors automatically, while also preventing duplicate book insertion through ISBN checks. A second utility, `scripts/seed_demo_users_and_reviews.py`, optionally creates example users and a small amount of review activity on top of the imported public books so that authentication and analytics features can be demonstrated more easily.
 
-**External data source used in this implementation:** The project uses **Open Library** as the real public metadata source for the bundled CSV dataset. Open Library provides open bibliographic data through its Search API (`https://openlibrary.org/search.json`) and states that it does not assert copyright over the database material; many records are public-domain or contributed as open data. In this project, Open Library is used as an offline import source rather than a live runtime dependency: records are fetched once, normalised into a project-specific CSV, and then imported into the local database.
+Open Library is used as an offline public-data source rather than a live dependency during request handling. This choice reduces runtime complexity and external failure risk while still allowing the project to demonstrate the use of genuine public data. The imported records remain traceable to an identifiable external source, which strengthens the academic credibility of the dataset and supports the coursework requirement to reference data origins.
 
 ---
 
 ## 3. Architecture and Technology Choices
 
-**Framework: FastAPI.** FastAPI was chosen for its native async support, automatic OpenAPI (Swagger) documentation, type hints and Pydantic validation, and performance. Compared to Django REST Framework, FastAPI offers a lighter-weight stack and built-in async, which fits a read-heavy API with analytics queries. The decision was documented in the project scope and reflected in the use of async database sessions and non-blocking request handling.
+FastAPI was selected as the core web framework because it provides asynchronous request handling, automatic OpenAPI documentation, strong type-hint integration, and clear support for dependency injection. This makes it well suited to a coursework project that needs a clean, testable service layer and a professional documentation story through Swagger UI and ReDoc.
 
-**Database: SQL (SQLite / PostgreSQL).** A relational database was chosen because the domain is naturally relational (books-authors, users-reviews-books, reading lists). Joins and aggregates are used for analytics (e.g. rating distribution per book, top genres by average rating). Transactions ensure consistency when creating reviews and updating book statistics. NoSQL was not selected because the access patterns are structured and the assignment encourages SQL unless NoSQL is clearly justified.
+SQL was chosen over a NoSQL alternative because the project domain is strongly relational. Books, authors, users, reviews, and reading lists depend on stable foreign-key relationships, and the analytics endpoints rely on joins and aggregate queries. SQLAlchemy 2.x is used as the ORM and session-management layer, while Alembic is used for migration tracking so that schema changes can be applied consistently across local and deployed environments.
 
-**Layered structure:** The application is organised into `app/api` (route handlers), `app/models` (SQLAlchemy ORM), `app/schemas` (Pydantic request/response models), `app/core` (configuration, security, exceptions), and `app/db` (database session). Dependency injection (e.g. `get_db`, `get_current_user`) keeps routes thin and testable.
+The codebase is organised into clear layers. Route handlers are defined under `app/api`, data models under `app/models`, request and response schemas under `app/schemas`, and shared services such as configuration, security, and exception helpers under `app/core`. This structure keeps endpoint logic compact and makes the application easier to test, maintain, and explain in the report and presentation.
 
-**Authentication and security:** Authentication uses JWT (python-jose) with HS256. Passwords are hashed with passlib and bcrypt. The login endpoint conforms to OAuth2 password flow for compatibility with Swagger UI. Access control is role-based: endpoints that create or update authors and books, or recalculate ratings, require the current user to have `is_admin=True`; review and reading-list endpoints require the user to be the resource owner or an admin.
-
-**Migrations:** Alembic is used for schema versioning. Migrations are generated from the ORM models and applied with `alembic upgrade head`, supporting repeatable deployments and different environments (e.g. local SQLite, production PostgreSQL).
+Authentication uses JSON Web Tokens created after a successful login request. Passwords are hashed rather than stored directly, and role-based checks restrict admin-only operations such as managing authors and books. The use of dependency-based authentication in FastAPI keeps security checks reusable and consistent across endpoints.
 
 ---
 
 ## 4. API Design and Implementation
 
-**REST conventions:** The API uses resource-based URLs under `/api/v1/`: e.g. `/api/v1/books`, `/api/v1/authors`, `/api/v1/reviews`, `/api/v1/reading-list`, `/api/v1/analytics`. HTTP methods follow REST: GET for retrieval, POST for creation, PUT for full updates, DELETE for removal. Status codes follow industry practice: 200 (OK), 201 (Created), 204 (No Content), 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error).
+The API follows a resource-oriented structure under the `/api/v1` prefix. Core resources are exposed through predictable REST-style routes such as `/authors`, `/books`, `/reviews`, `/reading-list`, and `/analytics`. CRUD operations use conventional HTTP methods: `GET` for retrieval, `POST` for creation, `PUT` for updates, and `DELETE` for removal. A dedicated health endpoint at `/api/v1/health/ping` supports deployment verification.
 
-**Key endpoints:** Health check: `GET /api/v1/health/ping`. Auth: `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`. Authors: list (with optional search), create, get, update, delete. Books: list (with pagination, search, filter by author/genre, sort by title/rating/ratings_count), create, get, update, delete, and `POST /api/v1/books/{id}/recalculate-rating`. Reviews: list (filter by book or user), create, update, delete; creating or updating a review triggers recalculation of the book's average_rating and ratings_count. Reading list: list current user's entries, add book, remove entry. Analytics: `GET /api/v1/analytics/books/{id}/rating-distribution`, `GET /api/v1/analytics/genres/top-rated`, `GET /api/v1/analytics/authors/trending`, `GET /api/v1/analytics/users/me/recommendations` (content-based from preferred genres and ratings).
+The authentication flow includes registration, login, and a current-user endpoint. The login endpoint follows the OAuth2 password flow expected by Swagger UI, which improves the usability of the interactive documentation. Once authenticated, a user can manage their own reviews and reading-list items. Administrative operations are guarded through explicit role checks.
 
-**Error format:** All error responses use a unified structure: `{"error": {"code": "...", "message": "...", "details": {...}}}`. Codes include BOOK_NOT_FOUND, AUTHOR_NOT_FOUND, REVIEW_FORBIDDEN, USER_EXISTS, INVALID_CREDENTIALS, etc. This allows clients to handle errors consistently and supports documentation of error codes in the API documentation.
+The books resource supports pagination, text search, filtering by author or genre, and ordering by title, average rating, or rating count. Reviews automatically trigger recalculation of derived book statistics so that the stored `average_rating` and `ratings_count` remain consistent with the underlying review data. This makes analytics queries cheaper and simplifies list views.
 
-**Pagination and filtering:** List endpoints accept `skip` and `limit`. Books support `search` (title substring), `author_id`, `genre`, and `order_by` (title, rating, ratings_count). Reviews and authors support relevant filters (e.g. book_id, user_id, search by author name).
+In addition to standard CRUD operations, the project includes analytical endpoints intended to demonstrate higher-value API functionality. These include rating distribution by book, top-rated genres, trending authors, and recommendation generation for the currently authenticated user. The recommendation logic is intentionally explainable rather than opaque: it uses the genres and ratings from a user’s prior activity to suggest books that match demonstrated preferences.
 
-**Advanced features:** Recalculation of book ratings from reviews; content-based recommendations using the user's highly rated books and preferred genres; role-based access for admin-only operations. Rate limiting and API keys are not implemented in the current version but can be added as middleware or dependencies.
+Error handling was standardised so that API consumers receive a unified response shape of the form `{"error": {"code": "...", "message": "...", "details": {...}}}`. This improves client-side predictability, makes the behaviour easier to document, and ensures validation and permission errors are communicated consistently.
 
 ---
 
 ## 5. Testing, Deployment, and Version Control
 
-**Testing:** The test suite uses pytest with pytest-asyncio and httpx. An in-memory SQLite database is used so tests do not depend on external state. The client fixture overrides the database dependency so that the same session is used for the app and for test setup (e.g. promoting a user to admin). Tests cover: (1) auth - register, login, and get current user; (2) authors and books CRUD - create author, create book, list with search, update, delete; (3) reviews and analytics - create reviews, check rating distribution, and call the recommendations endpoint. Tests are run with `pytest` from the project root.
+Automated testing is implemented with `pytest`, `pytest-asyncio`, and `httpx`. The test suite runs against an isolated in-memory SQLite database so that tests are repeatable and do not depend on local development data. Current coverage includes authentication behaviour, CRUD flows for authors and books, review creation and update behaviour, reading-list permissions, consistent error formatting, and analytics endpoints such as rating distribution and recommendations. This level of testing is especially important because the project uses asynchronous database access and role-based security checks, both of which are areas where regressions can be subtle.
 
-**Deployment:** The application can be deployed to a platform such as Render or Railway. The repository includes a `render.yaml` blueprint. Required environment variables include `DATABASE_URL` (PostgreSQL in production) and `JWT_SECRET_KEY`. The start command is `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Migrations should be run during the build or release phase (e.g. `alembic upgrade head`) against the production database. The README documents these steps and the option to use the provided CSV import for initial or demo data.
+The application is deployed on Render, with PostgreSQL used for the hosted database. The repository includes a `render.yaml` blueprint and environment-driven configuration through `.env` and deployment variables. The production service is available at [https://book-insight-api.onrender.com](https://book-insight-api.onrender.com), and the live interactive documentation is exposed at [https://book-insight-api.onrender.com/api/v1/docs](https://book-insight-api.onrender.com/api/v1/docs). Running Alembic migrations as part of the build process ensures that the database schema is in sync with the application code on deployment.
 
-**Version control:** The project is maintained in a Git repository with a clear commit history. Meaningful commit messages are used (e.g. feat: add CRUD for books; fix: tests use shared session for admin). The repository includes a README with setup and run instructions, links to API documentation, and data-loading options. The API documentation is available as Markdown (`docs/api-documentation.md`) for export to PDF and is also exposed interactively via Swagger UI at `/api/v1/docs`.
+Version control was managed through Git, with the project stored in a public GitHub repository at [https://github.com/John2968/book-insight-api](https://github.com/John2968/book-insight-api). Using Git throughout development supported incremental implementation, testing, refactoring, documentation updates, and deployment preparation. The repository also provides transparent evidence of development progress and supports the coursework expectation that version-control practice should be part of the presentation.
 
 ---
 
 ## 6. Use of Generative AI
 
-Generative AI was used in line with the module's “Green Light” policy. The tools and purposes are documented in the **Generative AI Declaration** (see `docs/genai-declaration.md` or Appendix A). Summary:
+Generative AI was used in line with the module's Green Light policy. The detailed declaration is provided in `docs/genai-declaration.md`, but the overall pattern of use can be summarised briefly here.
 
-- **Tools:** Cursor (and/or similar AI-assisted editors) and optionally other conversational AI tools were used for design discussion, code drafting, test design, documentation structure, and report drafting.
-- **Purposes:** Exploring API and error-response design, drafting Pydantic schemas and route structure, generating pytest fixtures and test cases, improving error handling and documentation, and structuring the technical report and GenAI declaration.
-- **Own contribution:** All design and technology decisions were made by the author. Code was reviewed for correctness, security, and consistency; tests were run and fixed (e.g. session isolation for admin role). The report and declaration were written and revised by the author; AI was used to improve clarity and structure, not to substitute for technical understanding.
-- **Verification:** The application and tests were run locally. AI-suggested code was checked and corrected where necessary (e.g. async fixture scope, OpenAPI customisation reverted per preference). Sample conversation logs are attached as supplementary material where required by the module.
+AI assistance was used to explore alternative API structures, compare architectural options, draft implementation scaffolding, improve error-handling consistency, generate and refine automated tests, and improve the organisation of the written documentation. AI support was also useful when troubleshooting dependency issues and evaluating how best to present the data-ingestion approach using a real public dataset.
+
+However, the final design decisions, implementation choices, corrections, verification steps, and all submission judgments remained the responsibility of the author. AI-generated suggestions were treated as draft material rather than authoritative answers and were checked against framework documentation, runtime behaviour, and coursework requirements before being kept.
 
 ---
 
 ## 7. Limitations and Future Work
 
-**Limitations:** The deployment is single-region and does not use caching. The recommendation logic is content-based (genre and rating preferences) rather than a trained machine-learning model. External APIs (Google Books, Open Library) are not yet integrated. Rate limiting and API keys are not implemented. The CSV import does not support very large files with streaming; for very large datasets, batch or chunked processing could be added.
+The current deployment is intentionally lightweight. It does not include caching, background task processing, rate limiting, API-key access, or CI/CD automation. The recommendation logic is heuristic and explainable rather than machine-learning based. In addition, Open Library is used as a curated offline import source rather than as a live enrichment dependency during requests, so some metadata fields remain incomplete when the public source does not provide them directly.
 
-**Future work:** Integrate Google Books or Open Library for metadata enrichment (descriptions, covers, ISBNs). Add rate limiting and optional API-key authentication for third-party clients. Improve recommendations (e.g. collaborative filtering or embedding-based similarity). Add more analytics (e.g. time-series trends, author comparison). Introduce a CI/CD pipeline for tests and deployment. Optionally support streaming or batch CSV import for large public datasets.
+There are several realistic directions for future improvement. The system could enrich records with additional live metadata sources, support cover and description backfilling, extend the analytics layer with more comparative and time-series views, and introduce stronger deployment automation. Recommendation quality could also be improved through collaborative filtering, embedding-based similarity, or hybrid ranking methods. These extensions were not necessary for the coursework deliverable but would be sensible next steps for a production-oriented version of the system.
 
 ---
 
-## References and Appendix
+## 8. References
 
-- **Repository:** [https://github.com/John2968/book-insight-api]
-- **API documentation:** See `docs/api-documentation.md` (export to PDF as required) and Swagger UI at `/api/v1/docs` when the server is running.
-- **Presentation slides:** [Link to your slides]
+1. FastAPI. *FastAPI Documentation*. Available at: [https://fastapi.tiangolo.com/](https://fastapi.tiangolo.com/)
+2. SQLAlchemy. *SQLAlchemy Documentation*. Available at: [https://docs.sqlalchemy.org/](https://docs.sqlalchemy.org/)
+3. Alembic. *Alembic Documentation*. Available at: [https://alembic.sqlalchemy.org/](https://alembic.sqlalchemy.org/)
+4. Open Library. *Search API Documentation*. Available at: [https://openlibrary.org/dev/docs/api/search](https://openlibrary.org/dev/docs/api/search)
+5. Render. *Render Documentation*. Available at: [https://render.com/docs](https://render.com/docs)
+6. GitHub repository for this project. Available at: [https://github.com/John2968/book-insight-api](https://github.com/John2968/book-insight-api)
 
-**Appendix A: Generative AI Declaration** - See `docs/genai-declaration.md` (included in submission as required).
+---
+
+## Appendix A: Supporting Materials
+
+- **Repository**: [https://github.com/John2968/book-insight-api](https://github.com/John2968/book-insight-api)
+- **Live API**: [https://book-insight-api.onrender.com](https://book-insight-api.onrender.com)
+- **Live API documentation**: [https://book-insight-api.onrender.com/api/v1/docs](https://book-insight-api.onrender.com/api/v1/docs)
+- **Written API documentation**: `docs/api-documentation.md` (export to PDF for submission)
+- **Generative AI declaration**: `docs/genai-declaration.md`
+- **Presentation slides**: submitted separately as the accompanying PPTX deck or linked in the final submission form, as required by the module

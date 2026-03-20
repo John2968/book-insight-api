@@ -1,19 +1,26 @@
 # Book Metadata, Review & Insight API
 
-A FastAPI-based REST API for managing books, authors, reviews, reading lists, and analytical insights (rating distributions, top genres, trending authors, personalised recommendations).
+This project is a FastAPI-based REST API for managing books, authors, reviews, reading lists, and analytical insight endpoints such as rating distributions, top-rated genres, trending authors, and personalised recommendations.
 
-## Tech stack
+## Links
+
+- **GitHub repository**: [https://github.com/John2968/book-insight-api](https://github.com/John2968/book-insight-api)
+- **Live deployment**: [https://book-insight-api.onrender.com](https://book-insight-api.onrender.com)
+- **Live Swagger UI**: [https://book-insight-api.onrender.com/api/v1/docs](https://book-insight-api.onrender.com/api/v1/docs)
+- **Live ReDoc**: [https://book-insight-api.onrender.com/api/v1/redoc](https://book-insight-api.onrender.com/api/v1/redoc)
+
+## Tech Stack
 
 - **Backend**: Python 3.12+, FastAPI
-- **Database**: SQLite (local dev) / PostgreSQL (recommended for production)
-- **ORM & migrations**: SQLAlchemy 2.x, Alembic
-- **Auth**: JWT (python-jose, passlib with bcrypt)
-- **Testing**: pytest, pytest-asyncio, httpx
-- **Docs**: OpenAPI (Swagger UI at `/api/v1/docs`), plus Markdown API doc in `docs/api-documentation.md`
+- **Database**: SQLite for local development, PostgreSQL for deployment
+- **ORM and migrations**: SQLAlchemy 2.x, Alembic
+- **Authentication**: JWT with `python-jose`, password hashing with `passlib` and `bcrypt`
+- **Testing**: `pytest`, `pytest-asyncio`, `httpx`
+- **Documentation**: OpenAPI / Swagger UI plus written documentation in `docs/`
 
-## Local development
+## Local Development
 
-### 1. Clone and setup
+### 1. Clone and set up the environment
 
 ```bash
 git clone https://github.com/John2968/book-insight-api.git
@@ -21,13 +28,13 @@ cd book-insight-api
 python -m venv .venv
 ```
 
-**Windows (PowerShell):**
+Windows PowerShell:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-**macOS/Linux:**
+macOS or Linux:
 
 ```bash
 source .venv/bin/activate
@@ -39,41 +46,46 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Environment
+### 3. Configure environment variables
 
-Copy the example env and adjust if needed:
+Create a local `.env` file from the example:
 
 ```bash
 copy .env.example .env
 ```
 
-Default `.env` uses SQLite: `DATABASE_URL=sqlite+aiosqlite:///./book_insight.db`. For production, set a PostgreSQL URL and a strong `JWT_SECRET_KEY`.
+By default, local development uses SQLite:
 
-### 4. Database migrations
+```text
+DATABASE_URL=sqlite+aiosqlite:///./book_insight.db
+```
+
+For deployment, set a PostgreSQL connection string and a strong `JWT_SECRET_KEY`.
+
+### 4. Run migrations
 
 ```bash
 alembic upgrade head
 ```
 
-### 5. Load data (optional)
+### 5. Load data
 
-**Option A – Seed demo users and reviews on top of the imported public book dataset (for testing auth and reviews):**
+Import the bundled public dataset:
+
+```bash
+python scripts/import_books_from_csv.py
+```
+
+Optionally seed demo users and reviews on top of the imported public books:
 
 ```bash
 python scripts/seed_demo_users_and_reviews.py
 ```
 
-Sample users: **admin** / `admin123`, **alice** / `password123`.
+Demo accounts created by the seed script:
 
-**Option B – Import books from a real public dataset export:**
-
-The repo includes `data/raw/open_library_books.csv`, a curated 20-book subset exported from the **Open Library Search API**. It contains real public book metadata mapped into this project's schema (`title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `publication_date`, `genre`).
-
-To import the bundled Open Library dataset:
-
-```bash
-python scripts/import_books_from_csv.py
-```
+- `admin` / `admin123`
+- `alice` / `password123`
 
 To regenerate the bundled dataset from Open Library:
 
@@ -81,13 +93,13 @@ To regenerate the bundled dataset from Open Library:
 python scripts/fetch_open_library_dataset.py
 ```
 
-To use your own CSV instead, place the file in `data/raw/` and run:
+To import a different CSV file:
 
 ```bash
 python scripts/import_books_from_csv.py data/raw/books.csv
 ```
 
-Supported columns: `title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `publication_date`, `genre`. See `data/raw/README.md` for source, licence, and citation details.
+Supported import fields include `title`, `authors`, `average_rating`, `isbn`, `ratings_count`, `publication_date`, and `genre`.
 
 ### 6. Run the API
 
@@ -95,59 +107,80 @@ Supported columns: `title`, `authors`, `average_rating`, `isbn`, `ratings_count`
 uvicorn app.main:app --reload
 ```
 
+Local URLs:
+
 - API base: `http://127.0.0.1:8000`
 - Swagger UI: `http://127.0.0.1:8000/api/v1/docs`
 - ReDoc: `http://127.0.0.1:8000/api/v1/redoc`
-- Health: `GET http://127.0.0.1:8000/api/v1/health/ping`
+- Health check: `http://127.0.0.1:8000/api/v1/health/ping`
 
 ## Testing
 
-```bash
-.venv\Scripts\python -m pytest
+Run the automated tests from the project root:
+
+```powershell
+.\.venv\Scripts\python -m pytest
 ```
 
-Runs tests for auth (register/login/me), authors/books CRUD, and reviews/analytics. Uses an in-memory SQLite database.
+The tests cover authentication, CRUD behaviour, review workflows, permission checks, error handling, and analytics endpoints using an isolated in-memory SQLite database.
 
-## API documentation
+## API Documentation
 
-- **Interactive**: Open `http://127.0.0.1:8000/api/v1/docs` when the server is running.
-- **Markdown source**: See `docs/api-documentation.md`.
-- **Submission artifact**: Export the Markdown file to `docs/api-documentation.pdf` (e.g. VS Code “Markdown PDF” or Pandoc) and include that PDF in the repository / submission materials.
+- **Interactive local docs**: `http://127.0.0.1:8000/api/v1/docs`
+- **Interactive live docs**: `https://book-insight-api.onrender.com/api/v1/docs`
+- **Markdown source**: `docs/api-documentation.md`
+- **Submission artifact**: export `docs/api-documentation.md` to PDF for submission
 
-## Data source
+## Data Source
 
-- **Bundled dataset**: `data/raw/open_library_books.csv`
-- **Origin**: exported from the [Open Library Search API](https://openlibrary.org/dev/docs/api/search) using `scripts/fetch_open_library_dataset.py`
-- **Licence / reuse**: Open Library states that it does not assert copyright over the database material and many records are public-domain / CC0-style open data; cite Open Library in your report and submission materials
+The bundled dataset is `data/raw/open_library_books.csv`, a curated 20-book subset generated from the [Open Library Search API](https://openlibrary.org/dev/docs/api/search) by `scripts/fetch_open_library_dataset.py`.
 
-## Deployment (e.g. Render / Railway)
+This dataset contains real public bibliographic metadata mapped to the API import format, including title, author, ISBN, publication date, rating average, rating count, and genre. Open Library states that it does not assert copyright over the underlying database material; the source is cited in the report and supporting documentation.
 
-1. Push the repo to GitHub (public or connected to the platform).
-2. Create a new **Web Service**; connect the repository.
+## Deployment Notes
+
+The application is deployed on Render at [https://book-insight-api.onrender.com](https://book-insight-api.onrender.com).
+
+For a fresh deployment on Render:
+
+1. Connect the GitHub repository.
+2. Create a PostgreSQL database.
 3. Set environment variables:
-   - `DATABASE_URL` – PostgreSQL connection string (Render/Railway provide one).
-   - `JWT_SECRET_KEY` – Strong random secret.
+   - `DATABASE_URL=postgresql+asyncpg://...`
+   - `JWT_SECRET_KEY=<strong-secret>`
    - `ENV=prod`
-   - Optionally `BACKEND_CORS_ORIGINS` if you need specific origins.
-4. **Build command** (if needed): `pip install -r requirements.txt`
-5. **Start command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-6. For PostgreSQL, run migrations in the build or a release phase, e.g. `alembic upgrade head` (ensure `DATABASE_URL` uses a sync driver for Alembic, or run migrations locally against the production DB).
+   - `BACKEND_CORS_ORIGINS=*` or a specific frontend origin if required
+4. Use the build command:
+   - `pip install -r requirements.txt && alembic upgrade head`
+5. Use the start command:
+   - `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+6. Optionally import the bundled dataset into the production database with `python scripts/import_books_from_csv.py`.
 
-## Project structure
+## Submission Files
 
-```
+The main report-style files for submission are:
+
+- `docs/technical-report.md` -> export to `docs/technical-report.pdf`
+- `docs/api-documentation.md` -> export to `docs/api-documentation.pdf`
+- `docs/genai-declaration.md` -> include as an appendix or separate PDF if required
+- presentation slides in PPTX format
+
+## Project Structure
+
+```text
 book-insight-api/
 ├── app/
-│   ├── api/v1/          # Route handlers (auth, authors, books, reviews, reading-list, analytics)
-│   ├── core/            # Config, security, exceptions
-│   ├── db/              # Database session
-│   ├── models/          # SQLAlchemy models
-│   ├── schemas/         # Pydantic request/response models
-│   └── main.py          # FastAPI application
-├── alembic/             # Database migrations
-├── scripts/              # e.g. import/export and demo seeding scripts
-├── tests/                # Pytest tests
-├── docs/                 # API documentation (Markdown), technical report
+│   ├── api/v1/           # Route handlers
+│   ├── core/             # Config, security, exceptions
+│   ├── db/               # Database session management
+│   ├── models/           # SQLAlchemy ORM models
+│   ├── schemas/          # Pydantic request and response schemas
+│   └── main.py           # FastAPI entry point
+├── alembic/              # Database migrations
+├── data/raw/             # Bundled and user-supplied CSV datasets
+├── docs/                 # Report, API documentation, submission notes
+├── scripts/              # Import, export, and seed utilities
+├── tests/                # Automated test suite
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -155,4 +188,4 @@ book-insight-api/
 
 ## Licence
 
-See `LICENSE` in the repository.
+See `LICENSE`.

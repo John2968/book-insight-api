@@ -4,13 +4,13 @@
 **Book Metadata, Review & Insight API**
 
 ## Overview
-This project aims to design and implement a data-driven Web API for book metadata management, user reviews, reading list tracking, and analytical insights. In addition to standard CRUD functionality, the system supports importing metadata from a real public source and provides personalised recommendations based on user activity and stored review data.
+This project designs and implements a data-driven Web API for book metadata management, user reviews, reading-list tracking, and analytical insight features. In addition to standard CRUD functionality, the system imports metadata from a real public source and provides personalised recommendations based on stored review behaviour.
 
 ## Objectives
 The main objectives of the project are to:
 - provide a structured RESTful API for managing books and related entities
 - allow users to create, view, update, and manage book reviews
-- support personal reading list management
+- support personal reading-list management
 - import and normalise book metadata from a public data source
 - expose analytics endpoints for exploring patterns in ratings, genres, and user preferences
 - generate personalised recommendations using explainable recommendation logic
@@ -52,10 +52,10 @@ The implemented public metadata source is:
 
 The project includes a curated CSV dataset generated from the Open Library Search API and stored as `data/raw/open_library_books.csv`. This dataset is created by `scripts/fetch_open_library_dataset.py` and imported into the application database by `scripts/import_books_from_csv.py`.
 
-This public metadata source is used to populate the local database with bibliographic details such as title, author, ISBN, publication year, genre, ratings average, and ratings count.
+This public metadata source is used to populate the database with bibliographic details such as title, author, ISBN, publication year, genre, average rating, and rating count.
 
 ## Non-Functional Requirements
-The project will also prioritise the following non-functional requirements:
+The project prioritises the following non-functional requirements:
 - RESTful and consistent API design
 - JWT-based authentication and access control
 - clear and standardised error handling

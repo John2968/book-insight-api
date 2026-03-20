@@ -1,59 +1,63 @@
 # Generative AI Declaration
 
 **Module:** COMP3011 Web Services and Web Data  
-**Assignment:** Coursework 1 – Individual Web Services API Development Project  
+**Assignment:** Coursework 1 - Individual Web Services API Development Project  
 **Project:** Book Metadata, Review & Insight API  
 
 ---
 
 ## Declaration
 
-I declare that I have used Generative AI tools in this assessment in accordance with the module’s “Green Light” policy. I have documented below the tools, purposes, and extent of use, and I have attached (or will attach) sample conversation logs as supplementary material where required.
+I declare that I used Generative AI tools in this assessment in accordance with the module's Green Light policy. The tools were used to support design exploration, implementation drafting, debugging, testing, and documentation improvement. All final technical decisions, code selection, verification steps, and submitted wording remained my own responsibility.
 
 ---
 
 ## Tools Used
 
-| Tool / product   | Purpose |
-|------------------|--------|
-| Cursor (AI-assisted editor) | API structure, Pydantic schemas, route handlers, database models, test fixtures and test cases, error-handling and exception helpers, README and documentation structure, CSV import script, technical report and GenAI declaration drafting. |
-| Other (e.g. ChatGPT / Copilot / Claude) | Explaining FastAPI and OpenAPI behaviour, JWT and OAuth2 flow, pytest-asyncio usage, and reviewing wording for the report. |
+| Tool / product | Purpose |
+|----------------|---------|
+| Cursor (AI-assisted editor) | Exploring endpoint structure, drafting FastAPI routes and schemas, reviewing database and authentication patterns, generating and refining tests, improving documentation structure, and helping draft the technical report and declaration. |
+| Other conversational AI tools (used occasionally) | Clarifying framework behaviour, reviewing wording, and discussing implementation alternatives before selecting the final approach. |
 
 ---
 
 ## How GenAI Was Used
 
-- **Design and architecture:** I used AI to explore REST endpoint design, unified error response formats, and layered structure (routes, schemas, models). I chose the final endpoint set, status codes, and role-based access rules myself.
-- **Implementation:** AI suggested FastAPI dependency injection, JWT creation/validation, and CRUD patterns. I adapted these to the project, wrote and adjusted the auth and CRUD routes, and implemented analytics and the CSV import script.
-- **Testing:** AI helped generate pytest fixtures (in-memory DB, client, session) and example tests. I modified assertions, fixed session isolation so admin role is set in the same DB as the test client, and verified all tests pass.
-- **Documentation:** The API documentation outline and README sections (setup, data loading, deployment) were drafted with AI; I revised and completed the content. The technical report outline and this declaration were drafted with AI; I filled in the technical details and ensured accuracy.
-- **Report:** AI was used to improve clarity and structure of the technical report; all technical content reflects my own understanding and design decisions.
+- **Design and architecture:** AI was used to compare API structures, discuss endpoint naming, explore error-response standardisation, and reason about how to combine CRUD functionality with analytics and recommendation endpoints.
+- **Implementation support:** AI provided draft code patterns for FastAPI dependency injection, JWT-based authentication, SQLAlchemy models, CRUD handlers, CSV ingestion utilities, and exception helpers. These suggestions were adapted, corrected, and integrated selectively.
+- **Testing and debugging:** AI was used to draft test ideas and help diagnose issues such as dependency installation problems, async fixture setup, database session isolation, and validation behaviour.
+- **Documentation:** AI supported the drafting and restructuring of the README, API documentation, technical report, and declaration so that the project could be presented more clearly and professionally.
 
 ---
 
 ## My Own Contribution
 
-- I defined the data model (users, authors, books, reviews, reading lists) and their relationships and validated them against the assignment and project scope.
-- I implemented and reviewed all application code, including security (JWT, password hashing, admin checks) and error handling.
-- I ran the application and tests locally and fixed issues (e.g. test DB session, dependency versions, CSV import column mapping).
-- I made all final decisions on technology stack (FastAPI, SQLite/PostgreSQL, Alembic, pytest), API shape, and deployment approach.
-- I wrote and revised the technical report and this declaration; I am responsible for the accuracy of the submitted materials.
+- I selected the project topic, defined the final scope, and chose the technology stack.
+- I decided the final data model, security model, endpoint set, and deployment strategy.
+- I reviewed all AI-generated suggestions before using them and rejected or changed outputs that did not match the coursework requirements or actual runtime behaviour.
+- I ran the application, verified the API behaviour, executed the tests, and corrected implementation issues where necessary.
+- I take responsibility for the correctness of the submitted code and documents.
 
 ---
 
-## Limitations and Verification
+## Verification and Limitations
 
-- AI was not used to run the application or execute tests; I ran these myself.
-- I checked AI-suggested code for correctness, security (e.g. password hashing, token handling), and consistency with the chosen design.
-- Where AI output was incomplete or incorrect (e.g. fixture scope, session isolation for admin tests, OpenAPI schema customisation), I corrected it.
-- I did not submit AI-generated text as my own without review; the report and declaration reflect my understanding and choices.
+- AI suggestions were treated as draft support rather than as authoritative answers.
+- I checked AI-assisted outputs against framework documentation, runtime results, and the coursework brief.
+- Where AI suggestions were inaccurate, incomplete, or poorly matched to the project, I revised them before keeping them.
+- AI did not replace my own understanding of the system; it was used to accelerate iteration and improve quality.
 
 ---
 
 ## Supplementary Material
 
-- Sample conversation exports (e.g. PDF or markdown of relevant Cursor or other AI conversations) are attached as required by the module. *[Insert file names or “See appendix in submitted PDF” when you attach them.]*
+Sample exported conversation logs are included as supplementary material alongside the submitted report, where required by the module.
 
 ---
 
-*Sign and date as required by your module. Keep this document in your submission (e.g. as an appendix to the Technical Report PDF) and ensure the full declaration is included as specified in the coursework brief.*
+## Signature
+
+**Name:** ____________________  
+**Student ID:** ____________________  
+**Signed:** ____________________  
+**Date:** ____________________  
