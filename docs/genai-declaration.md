@@ -52,12 +52,3 @@ I declare that I used Generative AI tools in this assessment in accordance with 
 ## Supplementary Material
 
 Sample exported conversation logs are included as supplementary material alongside the submitted report, where required by the module.
-
----
-
-## Signature
-
-**Name:** ____________________  
-**Student ID:** ____________________  
-**Signed:** ____________________  
-**Date:** ____________________  

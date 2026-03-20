@@ -125,13 +125,6 @@ I declare that I used Generative AI tools in this assessment in accordance with 
 - Where AI suggestions were inaccurate, incomplete, or poorly matched to the project, I revised them before keeping them.
 - AI did not replace my own understanding of the system; it was used to accelerate iteration and improve quality.
 
-### Signature
-
-**Name:** ____________________  
-**Student ID:** ____________________  
-**Signed:** ____________________  
-**Date:** ____________________  
-
 ---
 
 ## Appendix B: Selected AI Conversation Logs
