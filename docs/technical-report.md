@@ -81,7 +81,7 @@ There are several realistic directions for future improvement. The system could 
 
 ---
 
-## 8. References
+## References
 
 1. FastAPI. *FastAPI Documentation*. Available at: [https://fastapi.tiangolo.com/](https://fastapi.tiangolo.com/)
 2. SQLAlchemy. *SQLAlchemy Documentation*. Available at: [https://docs.sqlalchemy.org/](https://docs.sqlalchemy.org/)
