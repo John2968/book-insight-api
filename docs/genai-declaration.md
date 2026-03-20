@@ -46,9 +46,3 @@ I declare that I used Generative AI tools in this assessment in accordance with 
 - I checked AI-assisted outputs against framework documentation, runtime results, and the coursework brief.
 - Where AI suggestions were inaccurate, incomplete, or poorly matched to the project, I revised them before keeping them.
 - AI did not replace my own understanding of the system; it was used to accelerate iteration and improve quality.
-
----
-
-## Supplementary Material
-
-Sample exported conversation logs are included as supplementary material alongside the submitted report, where required by the module.

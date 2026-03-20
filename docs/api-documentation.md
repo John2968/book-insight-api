@@ -452,7 +452,3 @@ Response:
 - `404` - requested resource not found
 - `422` - request validation failure
 - `500` - unexpected internal server error
-
----
-
-Export this file to PDF for submission, or include the exported PDF alongside the technical report as required by the module brief.
