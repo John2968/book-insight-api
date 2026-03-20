@@ -66,7 +66,7 @@ For submission purposes, the main project links are as follows:
 - **Public GitHub repository:** [https://github.com/John2968/book-insight-api](https://github.com/John2968/book-insight-api)
 - **API documentation in the repository (Markdown source):** [https://github.com/John2968/book-insight-api/blob/main/docs/api-documentation.md](https://github.com/John2968/book-insight-api/blob/main/docs/api-documentation.md)
 - **API documentation in the repository (PDF after export):** [https://github.com/John2968/book-insight-api/blob/main/docs/api-documentation.pdf](https://github.com/John2968/book-insight-api/blob/main/docs/api-documentation.pdf)
-- **Presentation slides:** replace this line with the final hosted slides link before exporting the PDF
+- **Presentation slides:** [https://leeds365-my.sharepoint.com/:p:/r/personal/sc23jl3_leeds_ac_uk/Documents/Presentation.pptx?d=w13d83ea6105341c88632fd572bea867c&csf=1&web=1&e=3AsbMt]
 - **Live API documentation:** [https://book-insight-api.onrender.com/api/v1/docs](https://book-insight-api.onrender.com/api/v1/docs)
 
 ---
