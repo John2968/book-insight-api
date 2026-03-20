@@ -142,46 +142,46 @@ The following examples summarise selected conversations that show how I used Gen
 
 **Question:** How can this project be shaped so that it aims for a high mark in both technical quality and GenAI usage, rather than being only a minimal CRUD API?
 
-**Answer:** The AI suggested framing the work as a complete Book Metadata and Review Analytics API rather than a simple CRUD exercise. It recommended planning the project in stages, including architecture, data modelling, CRUD resources, analytics, testing, deployment, and documentation. This discussion informed the final scope of the project and encouraged the inclusion of higher-value features such as analytics and recommendations.
+**Answer:** This project can be framed as a complete Book Metadata and Review Analytics API rather than a simple CRUD exercise. It should be planned in stages, including architecture, data modelling, CRUD resources, analytics, testing, deployment, and documentation. This direction supports a broader and more ambitious scope, including higher-value features such as analytics and recommendations.
 
 ### B2. Deciding the Technical Stack
 
 **Question:** Which technology stack would be most suitable if the API needed to be modern, well documented, easy to demonstrate, and suitable for deployment?
 
-**Answer:** The AI compared possible options and recommended FastAPI, SQLAlchemy, Alembic, JWT authentication, SQLite for local development, and PostgreSQL for deployment. It also explained that this stack would support automatic API documentation, modular code structure, testing, and hosted deployment. This was consistent with the final implementation described in the main report.
+**Answer:** A suitable stack is FastAPI, SQLAlchemy, Alembic, JWT authentication, SQLite for local development, and PostgreSQL for deployment. This combination supports automatic API documentation, modular code structure, testing, and hosted deployment. It is also consistent with the final implementation described in the main report.
 
 ### B3. Planning the Data Model and Endpoint Structure
 
 **Question:** How should the project be broken down into entities and endpoints so that the API feels complete rather than fragmented?
 
-**Answer:** The AI suggested a relational design based on `User`, `Author`, `Book`, `Review`, and `ReadingListEntry`, together with REST endpoints for authentication, books, authors, reviews, reading lists, and analytics. It also recommended features such as pagination, filtering, sorting, rating distributions, and personalised recommendations. This aligned with the final API design and helped structure the service beyond the minimum endpoint requirement.
+**Answer:** The project can be structured around a relational design based on `User`, `Author`, `Book`, `Review`, and `ReadingListEntry`, together with REST endpoints for authentication, books, authors, reviews, reading lists, and analytics. It is also useful to include pagination, filtering, sorting, rating distributions, and personalised recommendations. This structure aligns with the final API design and helps the service go beyond the minimum endpoint requirement.
 
 ### B4. Finding and Integrating a Real Public Dataset
 
 **Question:** What would be a better dataset strategy than relying only on hand-written sample data?
 
-**Answer:** The AI suggested using a genuine public metadata source and helped evaluate a workflow in which data could be fetched, normalised, stored in CSV form, and imported into the application database. This discussion supported the decision to use Open Library as the public metadata source and to implement the workflow around `scripts/fetch_open_library_dataset.py`, `data/raw/open_library_books.csv`, and `scripts/import_books_from_csv.py`.
+**Answer:** A better strategy is to use a genuine public metadata source and build a workflow in which data can be fetched, normalised, stored in CSV form, and imported into the application database. This supports the decision to use Open Library as the public metadata source and to implement the workflow around `scripts/fetch_open_library_dataset.py`, `data/raw/open_library_books.csv`, and `scripts/import_books_from_csv.py`.
 
 ### B5. Rethinking the Seeding Strategy
 
 **Question:** After adopting a real public dataset, how can demonstration data still be used without implying that every part of the database is fully real?
 
-**Answer:** The AI suggested separating real imported book metadata from optional demonstration user behaviour. Instead of inventing the whole dataset, it recommended keeping the books real and adding only a small number of example users and reviews for testing and presentation. This matches the final use of `scripts/seed_demo_users_and_reviews.py`, which adds demo activity on top of imported public books.
+**Answer:** Real imported book metadata can be separated from optional demonstration user behaviour. Instead of inventing the whole dataset, it is better to keep the books real and add only a small number of example users and reviews for testing and presentation. This matches the final use of `scripts/seed_demo_users_and_reviews.py`, which adds demo activity on top of imported public books.
 
 ### B6. Debugging Dependencies, Migrations, and Runtime Errors
 
 **Question:** How should the runtime and installation errors encountered during development be interpreted and fixed?
 
-**Answer:** The AI helped narrow down issues such as missing packages like `aiosqlite` and `email-validator`, Alembic migration problems, requirements-file encoding issues, and password-hashing compatibility warnings. It helped reason from the traceback to likely causes and suggested specific fixes to test. These exchanges supported the final stable setup process described elsewhere in the report.
+**Answer:** These errors can be investigated by tracing each failure back to its likely cause and then testing targeted fixes. In this project, that included missing packages such as `aiosqlite` and `email-validator`, Alembic migration problems, requirements-file encoding issues, and password-hashing compatibility warnings. Working through the tracebacks in this way supported the final stable setup process described elsewhere in the report.
 
 ### B7. Improving Tests and Error Handling
 
 **Question:** How can the API be made stronger in terms of testing and error handling, rather than only implementing the happy path?
 
-**Answer:** The AI suggested writing tests for authentication, CRUD flows, analytics, permission checks, validation behaviour, and error formatting. It also supported the idea of returning a consistent error-response shape so that code, tests, and documentation would align. This was consistent with the final pytest suite and the unified error format used across the API.
+**Answer:** The API can be strengthened by writing tests for authentication, CRUD flows, analytics, permission checks, validation behaviour, and error formatting. It is also useful to return a consistent error-response shape so that code, tests, and documentation align with each other. This is consistent with the final pytest suite and the unified error format used across the API.
 
 ### B8. Deployment and Final Submission Preparation
 
 **Question:** Once the API was working, how should the final stage of the project be handled in terms of deployment, documentation, and submission preparation?
 
-**Answer:** The AI helped reason through Render deployment, environment variables, the difference between local SQLite and deployed PostgreSQL, how to use Swagger UI and ReDoc for demonstration, and how to restructure the technical report so that the GenAI declaration and selected conversation evidence would appear in the appendices. This supported the final deployment and the submission-ready report structure described in this document.
+**Answer:** The final stage can be handled by working through Render deployment, environment variables, the difference between local SQLite and deployed PostgreSQL, how Swagger UI and ReDoc can be used for demonstration, and how the technical report should be restructured so that the GenAI declaration and selected conversation evidence appear in the appendices. This supports the final deployment and the submission-ready report structure described in this document.
