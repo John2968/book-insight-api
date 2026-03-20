@@ -61,6 +61,14 @@ The application is deployed on Render [5], with PostgreSQL used for the hosted d
 
 Version control was managed through Git, with the project stored in a public GitHub repository [6] at [https://github.com/John2968/book-insight-api](https://github.com/John2968/book-insight-api). Using Git throughout development supported incremental implementation, testing, refactoring, documentation updates, and deployment preparation. The repository also provides transparent evidence of development progress and supports the coursework expectation that version-control practice should be part of the presentation.
 
+For submission purposes, the main project links are as follows:
+
+- **Public GitHub repository:** [https://github.com/John2968/book-insight-api](https://github.com/John2968/book-insight-api)
+- **API documentation in the repository (Markdown source):** [https://github.com/John2968/book-insight-api/blob/main/docs/api-documentation.md](https://github.com/John2968/book-insight-api/blob/main/docs/api-documentation.md)
+- **API documentation in the repository (PDF after export):** [https://github.com/John2968/book-insight-api/blob/main/docs/api-documentation.pdf](https://github.com/John2968/book-insight-api/blob/main/docs/api-documentation.pdf)
+- **Presentation slides:** replace this line with the final hosted slides link before exporting the PDF
+- **Live API documentation:** [https://book-insight-api.onrender.com/api/v1/docs](https://book-insight-api.onrender.com/api/v1/docs)
+
 ---
 
 ## 6. Use of Generative AI
@@ -70,6 +78,8 @@ Generative AI was used in line with the module's Green Light policy. The formal 
 AI assistance was used to explore alternative API structures, compare architectural options, draft implementation scaffolding, improve error-handling consistency, generate and refine automated tests, and improve the organisation of the written documentation. AI support was also useful when troubleshooting dependency issues and evaluating how best to present the data-ingestion approach using a real public dataset.
 
 However, the final design decisions, implementation choices, corrections, verification steps, and all submission judgments remained the responsibility of the author. AI-generated suggestions were treated as draft material rather than authoritative answers and were checked against framework documentation, runtime behaviour, and coursework requirements before being kept.
+
+One important challenge during the project was distinguishing between suggestions that were convenient and suggestions that were genuinely suitable for the coursework requirements and the actual runtime behaviour of the application. This was particularly relevant when dealing with dependency issues, migration configuration, testing isolation, and the use of real public data. A key lesson learned was that Generative AI is most valuable when used as a structured assistant for exploration, debugging, and reflection, but its outputs still need to be validated carefully through testing, documentation checks, and independent technical judgment.
 
 ---
 

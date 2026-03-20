@@ -23,7 +23,6 @@ pandoc docs/technical-report.md -o docs/technical-report.pdf
 - Make sure the final technical report PDF includes:
   - `Appendix A: GenAI Declaration`
   - `Appendix B: Selected AI Conversation Logs`
-- Add your name, student ID, signature, and date before exporting.
 - If Minerva allows supplementary uploads, you may also upload the original exported conversation files separately.
 
 ## 3. API Documentation PDF
